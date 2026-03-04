@@ -1,0 +1,1022 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pursuit of Code</title>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+        }
+
+        #frame {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            min-width: 100vw;
+            min-height: 100vh;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100vh;
+            object-fit: contain;
+            width: auto;
+            height: auto;
+            margin: auto;
+        }
+
+        #perfection-score {
+            position: absolute;
+            font-size: 1rem;
+            font-family: "Roboto";
+            color: rgb(59, 59, 59);
+            align-self: baseline;
+            bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="frame">
+        <p id="perfection-score">System Rating: <b>Notable</b></p>
+        <canvas id="defaultCanvas0" class="p5Canvas" width="1880" height="1880"
+            style="width: 940px; height: 940px;"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
+    <script>
+
+        // ======================
+        // VARIABLES DECLARATION
+        // ======================
+        let canvasSize, origin, x, y; // Canvas initialization variables 
+        let trace = []; // Array of coordinates for plotting out pendulum swing path
+        let traceAnimation = [];
+        let amplitudeX, amplitudeY, dampingX, dampingY, periodX, periodY, phaseOffsetX, phaseOffsetY, freqX, freqY, periodRatio; // Pendulum equation parameters
+        let aspectRatio; // aspect ratio of x and y amplitudes
+        let periodOffset = 0; // Offset applied to periods (x or y) that simulate imperfections in the system
+        let totalPoints; // Total points used in calculating trace[] path
+        let fps = 60; // Frame rate 
+        let currentPoint = 0; // Starting point index for swing path
+
+        // State variable for animated versus fully drawn states (change to false for snapshot version)       
+        let animateDrawing = true;
+        let animateDrawingFirst = true;
+        let clickState = animateDrawing ? 0 : 1; // Initialize what state the piece is in (animated verses static)
+
+        let startTime = 0; // Initialize start time
+        let runtime; // Total time a drawing takes to complete
+        let periodRatios; // Array of possible period rations (periodX / periodY)
+        let periodRatiosObj; // Object to map period ratios to their respective strings
+        let strokeSize; // Line width in pixels
+        let pixelDensityValue; // Pixel density value used for caluclating and creating noise layers (paperTexture and pencilTexture)
+        let mode; // Mode of the piece (Dark or Light)
+        let colorTheme; // Color theme of the piece
+        let highResCanvasSize; // Canvas size when downloading the high res version of the artwork
+        let filename; // File name for downloaded high res file
+        let prevPixelDensity; // Variable to store default pixel density before high res download 
+        let prevStrokeSize; // Variable to store stroke size before high res download 
+        let ratioIndex; // Variable for random choice of possible period ratios
+        let periodRatioString; // Allows lookup of period ratio string from period ratio in the periodRatiosObj
+        let phaseOffsets; // Array containing possible phase offsets 
+        let phaseOffsetObj; // Object to map phase offsets to their respective strings
+        let phaseOffsetStringX, phaseOffsetStringY; // Allows lookup of phase offset strings using phase offset in the phaseOffsetObj
+        let perfectionScore; // Calculated metric, ranging from 5 - 100 in steps of 5, that represents how "perfect" a pendulum output is
+        let systemRating; // Category for each pendulum output, driven by the perfection score
+        let bonusPoints; // Bonus points added to calculated perfection score for certain period ratios with lower than 7 lcm's
+        let lcm, lcms; // Least common multiplier, used to determine how much in common the x and y period have
+        let adjustedScore; // The calculated score after applying all reduction mechanisms
+        let dampingPercentileX, dampingPercentileY; // Percentile of the damping ratios (out of a perfect damping ratio of 1)
+        let scaledValue; // Scaled average of the two damping percentiles 
+        let lineType, lineTypes; // beginShape() type that results in either a solid line or dashed line
+        let particles = []; // Array to hold the particles
+        let particleSize;
+        let traceForward = true;
+        let seedValue;
+        let maxCycleCount;
+        let lineTypeString;
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        // Setup function with random determination of parameters
+        function setup() {
+
+            // ======================
+            // DEFINE CONST
+            // ======================   
+
+            // Seed algorithm
+            const urlParams = new URLSearchParams(window.location.search);
+            seedValue = urlParams.has("seed")
+                ? parseInt(urlParams.get("seed"))
+                : Math.floor(random() * (2 ** 32));
+            randomSeed(seedValue);
+
+            // Canvas setup //
+            canvasSize = min(windowWidth, windowHeight)
+            let canvas = createCanvas(canvasSize, canvasSize);
+            canvas.parent('frame');
+            frameRate(fps);
+            origin = createVector(width / 2, height / 2);
+
+            // Other misc constants //
+            if (canvasSize > 2048) {
+                pixelDensityValue = max(1, floor(4096 / canvasSize));
+            } else {
+                pixelDensityValue = min(4, floor(2048 / canvasSize));
+            }
+            ellipseSize = canvasSize / 200;
+            if (parseFloat((canvasSize / 1200).toFixed(1)) < 0.75) {
+                strokeSize = 0.75;
+            } else {
+                strokeSize = parseFloat((canvasSize / 1200).toFixed(1));
+            }
+
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+            // ==============================
+            // DEFINE RANDOM SELECTION ARRAYS
+            // ==============================
+
+            // Possible line types //
+            lineTypes = [null, LINES];
+
+            // Possible period ratios //
+            periodRatios = [1 / 1, 1 / 2, 1 / 3, 1 / 4, 1 / 5, 1 / 6, 1 / 7, 1 / 8, 1 / 9, 1 / 10, 2 / 3, 2 / 5, 2 / 7, 2 / 9, 3 / 4, 3 / 5, 3 / 7, 3 / 8, 4 / 5, 4 / 7, 4 / 9, 5 / 6, 5 / 7, 5 / 8, 5 / 9, 6 / 7, 7 / 8, 7 / 9, 8 / 9, 9 / 10];
+            periodRatiosObj = { "1:1": 1 / 1, "1:2": 1 / 2, "1:3": 1 / 3, "1:4": 1 / 4, "1:5": 1 / 5, "1:6": 1 / 6, "1:7": 1 / 7, "1:8": 1 / 8, "1:9": 1 / 9, "1:10": 1 / 10, "2:3": 2 / 3, "2:5": 2 / 5, "2:7": 2 / 7, "2:9": 2 / 9, "3:4": 3 / 4, "3:5": 3 / 5, "3:6": 3 / 6, "3:7": 3 / 7, "3:8": 3 / 8, "4:5": 4 / 5, "4:7": 4 / 7, "4:9": 4 / 9, "5:6": 5 / 6, "5:7": 5 / 7, "5:8": 5 / 8, "5:9": 5 / 9, "6:7": 6 / 7, "7:8": 7 / 8, "7:9": 7 / 9, "8:9": 8 / 9, "9:10": 9 / 10 };
+
+            // Least common multiple array //
+            lcms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 6, 10, 14, 18, 12, 15, 21, 24, 20, 28, 36, 30, 35, 40, 45, 42, 56, 63, 72, 90];
+
+            // Possible phase offsets //
+            phaseOffsets = [0, PI / 8, PI / 4, PI / 3, PI / 2, PI];
+            phaseOffsetObj = { "0": 0, "π/8": PI / 8, "π/4": PI / 4, "π/3": PI / 3, "π/2": PI / 2, "π": PI };
+
+
+            // =====================
+            // RANDOM DETERMINATION
+            // =====================
+
+            // Determine lineType //
+            let randomLine = random(1);
+            if (randomLine < 0.25) {
+                lineType = LINES;
+            } else {
+                lineType = null;
+            }
+            // Convert lineType to string
+            lineTypeString = (lineType === LINES) ? "Dashed" : "Solid";
+
+            // Set colors and mode //
+            let lightModeRand = random(1);
+            let colorRand = random(1);
+            let strokeColorRand = random(1);
+            if (lightModeRand < 0.5) {
+                mode = "Dark";
+                if (colorRand < 0.7) {
+                    colorTheme = "None"
+                    colorRed = 22;
+                    colorGreen = 22;
+                    colorBlue = 22;
+                } else if (colorRand >= 0.7 && colorRand < 0.8) {
+                    colorTheme = "Deep Grove"
+                    colorRed = 28 * 0.75;
+                    colorGreen = 48 * 0.75;
+                    colorBlue = 35 * 0.75;
+                } else if (colorRand >= 0.8 && colorRand < 0.9) {
+                    colorTheme = "Slate Horizon"
+                    colorRed = 27 * 0.75;
+                    colorGreen = 46 * 0.75;
+                    colorBlue = 74 * 0.75;
+                } else {
+                    colorTheme = "Iron Ember"
+                    colorRed = 76 * 0.75;
+                    colorGreen = 30 * 0.75;
+                    colorBlue = 30 * 0.75;
+                }
+                strokeColorRed = 255;
+                strokeColorGreen = 250;
+                strokeColorBlue = 240;
+                strokeAlpha = 245;
+                exposureThreshold = 0.6;
+                if (lineType === POINTS) {
+                    strokeSize = 1.5;
+                }
+            } else {
+                mode = "Light";
+                if (colorRand < 0.7) {
+                    colorTheme = "None"
+                    strokeColorRed = 48; // Charcoal
+                    strokeColorGreen = 46;
+                    strokeColorBlue = 40;
+                } else if (colorRand >= 0.7 && colorRand < 0.8) {
+                    colorTheme = "Deep Grove"
+                    strokeColorRed = 28;
+                    strokeColorGreen = 48;
+                    strokeColorBlue = 35;
+                } else if (colorRand >= 0.8 && colorRand < 0.9) {
+                    colorTheme = "Slate Horizon"
+                    strokeColorRed = 27;
+                    strokeColorGreen = 46;
+                    strokeColorBlue = 74;
+                } else {
+                    colorTheme = "Iron Ember"
+                    strokeColorRed = 76;
+                    strokeColorGreen = 30;
+                    strokeColorBlue = 30;
+                }
+                colorRed = 255;
+                colorGreen = 250;
+                colorBlue = 240;
+                strokeAlpha = 240;
+                exposureThreshold = 0.15;
+                if (lineType === POINTS) {
+                    strokeSize = 2;
+                }
+            }
+
+            // Determine x and y amplitudes //
+            let minAmp = canvasSize / 10;
+            let guaranteedAmpMin = canvasSize / 5;
+            let guaranteedAmpMax = canvasSize / 2.25;
+
+            if (random() < 0.5) {
+                // Ensure X is larger
+                amplitudeX = randomIncrement(guaranteedAmpMin, guaranteedAmpMax, 1);
+                amplitudeY = randomIncrement(minAmp, guaranteedAmpMax, 1);
+            } else {
+                // Ensure Y is larger
+                amplitudeY = randomIncrement(guaranteedAmpMin, guaranteedAmpMax, 1);
+                amplitudeX = randomIncrement(minAmp, guaranteedAmpMax, 1);
+            }
+
+            aspectRatio = amplitudeX / amplitudeY;
+            if (aspectRatio > 1) {
+                aspectRatio = 1 / aspectRatio;
+            }
+
+            // Determine period ratio //
+            ratioIndex = randomIncrement(0, 29, 1);
+            periodRatio = periodRatios[ratioIndex];
+            periodRatioString = findPeriodRatioString(periodRatiosObj, periodRatio);
+            lcm = lcms[ratioIndex];
+
+            // Determine x and y periods //
+            let minPeriod = 1.5;
+            let maxPeriod = (1 / periodRatio) * minPeriod;
+
+            if (random(1) < 0.5) {
+                periodX = minPeriod;
+                periodY = maxPeriod;
+            } else {
+                periodX = maxPeriod;
+                periodY = minPeriod;
+            }
+
+            // Determine if there is a period offset //
+            if (random(1) < 0.5) {
+                if (random(1) < 0.5) {
+                    periodOffset = randomIncrement(0.0001, 0.01, 0.0001);
+                    periodX += periodOffset;
+                } else {
+                    periodOffset = randomIncrement(0.0001, 0.01, 0.0001);
+                    periodY += periodOffset;
+                }
+            }
+
+            // Calculate x and y frequencies //
+            freqX = 1 / periodX;
+            freqY = 1 / periodY;
+
+            // Determine damping coefficients //
+            minDampingX = roundToEightDecimalPlaces(dampingCoefficient(periodX));
+            minDampingY = roundToEightDecimalPlaces(dampingCoefficient(periodY));
+            // dampingX = randomIncrement(minDampingX, 1, 0.000001);
+            // dampingY = randomIncrement(minDampingY, 1, 0.000001);
+            dampingX = randomIncrement(0.9998, 1, 0.000001);
+            dampingY = randomIncrement(0.9998, 1, 0.000001);
+            if (dampingX === 1 && dampingY === 1) {
+                if (random(1) < 0.5) {
+                    dampingX = 1 - 0.000001;
+                } else {
+                    dampingY = 1 - 0.000001;
+                }
+            }
+
+            // Determine phase offsets //
+            phaseOffsetX = phaseOffsets[randomIncrement(0, 5, 1)];
+            phaseOffsetY = phaseOffsets[randomIncrement(0, 5, 1)];
+
+            phaseOffsetStringX = findPhaseOffsetString(phaseOffsetObj, phaseOffsetX);
+            phaseOffsetStringY = findPhaseOffsetString(phaseOffsetObj, phaseOffsetY);
+
+            // Damping percentiles (out of a perfect value of 1) //    
+            dampingPercentileX = (dampingX - minDampingX) / (1 - minDampingX);
+            dampingPercentileY = (dampingY - minDampingY) / (1 - minDampingY);
+            scaledValue = ((dampingPercentileX + dampingPercentileY) / 2) * 100;
+
+            // Determine cycle count //
+            maxCycleCount = max(150, min(dampingPercentileX, dampingPercentileY) * 500);
+            // console.log(`maxCycleCount: ${maxCycleCount}`);
+            cycleCount = randomIncrement(10, maxCycleCount, 1);
+
+            // Calculate the animation runtime (exposure time) //
+            runtime = (cycleCount * min(periodX, periodY)).toFixed(0);
+
+            // Total points to calculate //
+            totalPoints = runtime * fps;
+
+            // ========== Calculate the Perfection Score ========== //
+
+            // Score reduction factors //
+            let lcmReduction = (lcm / 3) * (1 - exp(-(2.1 - (dampingPercentileX + dampingPercentileY))));
+            let aspectRatioReduction = 13 * pow(1 - aspectRatio, 4);
+            let scaleReduction = 20 * pow(1 - ((amplitudeX + amplitudeY) / canvasSize), 4);
+            let periodOffsetReduction = 5 * pow(1 * (periodOffset / 0.01), 3);
+            let cycleCountReduction = 10 * pow(1 - (cycleCount / maxCycleCount), 10);
+
+            // console.log(`LCM Reduction: ${lcmReduction}`);
+            // console.log(`Aspect Ratio Reduction: ${aspectRatioReduction}`);
+            // console.log(`Scale Reduction: ${scaleReduction}`);
+            // console.log(`Period Offset Reduction: ${periodOffsetReduction}`);
+            // console.log(`Cycle Count Reduction: ${cycleCountReduction}`);
+
+            // Bonus Points for period ratios with LCM < 7 //
+
+            if (lcm <= 6) {
+                bonusPoints = (100 - scaledValue) * ((7 - (lcm + (1 / lcm))) / 10);
+            } else {
+                bonusPoints = 0;
+            }
+
+            // Calculate adjusted score //
+            adjustedScore = scaledValue - lcmReduction - aspectRatioReduction
+                - scaleReduction - periodOffsetReduction - cycleCountReduction + bonusPoints;
+
+            // Convert to Perfection Score
+            perfectionScore = floor(adjustedScore);
+
+            if (perfectionScore < 5) {
+                perfectionScore = 5;
+            }
+
+            if (perfectionScore >= 95) {
+                systemRating = "Perfect";
+            } else if (perfectionScore >= 90) {
+                systemRating = "Superior";
+            } else if (perfectionScore >= 85) {
+                systemRating = "Advanced";
+            } else if (perfectionScore >= 80) {
+                systemRating = "Notable";
+            } else if (perfectionScore >= 70) {
+                systemRating = "Proficient";
+            } else if (perfectionScore >= 60) {
+                systemRating = "Forming";
+            } else {
+                systemRating = "Emergent";
+            }
+
+            // ========== Create noise layers ========== //        
+            paperTexture = createGraphics(width, height);
+            paperTexture.pixelDensity(pixelDensityValue);
+            pencilTexture = createGraphics(width, height);
+            pencilTexture.pixelDensity(pixelDensityValue);
+            generatePaperTexture();
+            generatePencilTexture();
+
+            //// Calculate trace array with all x and y coordinates
+            calculateTrace();
+            calculateTraceAnimation();
+            if (!animateDrawing) {
+                drawTrace();
+            }
+
+            printParameters()
+        }
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////   
+
+
+        // =====================
+        // BEGIN FUNCTIONS
+        // =====================
+
+        // Function to convert string to hash for random seeding
+        function stringToHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash |= 0; // Convert to 32bit integer
+            }
+            return hash;
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to round to six decimal places
+        function roundToEightDecimalPlaces(num) {
+            return Math.round(num * 1e8) / 1e8;
+        };
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to calculate minimum damping coefficient, calculated as a function of the period and linearly interpolated
+        function dampingCoefficient(p) {
+            // console.log(`p value: ${p}`);
+            // Define the known period lengths and their corresponding damping coefficients, following the power of 2's
+            let periods = [1, 2, 4, 8, 16];
+            let coefficients = [0.99925, 0.999625, 0.9998125, 0.99990625, 0.999953125];
+
+            // If p is exactly one of the known periods, return the corresponding coefficient directly
+            for (let i = 0; i < periods.length; i++) {
+                if (p === periods[i]) {
+                    return coefficients[i];
+                }
+            }
+
+            // For p values between known periods, interpolate linearly between the nearest points
+            for (let i = 0; i < periods.length - 1; i++) {
+                if (p > periods[i] && p < periods[i + 1]) {
+                    // Linear interpolation formula
+                    let y0 = coefficients[i];
+                    let y1 = coefficients[i + 1];
+                    let x0 = periods[i];
+                    let x1 = periods[i + 1];
+                    return y0 + (y1 - y0) * ((p - x0) / (x1 - x0));
+                }
+            }
+        };
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to bin the damping and amplitude values
+        function binDamping(value) {
+            if (value >= 0.999999) return "None";
+            if (value >= 0.999990) return "Minimal";
+            if (value >= 0.999970) return "Very Low";
+            if (value >= 0.999940) return "Low";
+            if (value >= 0.999900) return "Medium";
+            if (value >= 0.999850) return "High";
+            return "Very High";
+        }
+
+        function binAmplitude(value, canvasSize) {
+            const min = canvasSize / 10;
+            const max = canvasSize / 2.25;
+
+            const normalized = (value - min) / (max - min); // range: 0 to 1
+            const bin = Math.round(normalized * 9) + 1; // scale to 1–10
+            const clamped = Math.max(1, Math.min(10, bin)); // clamp result
+            return `${clamped}/10`; // format as string
+        }
+
+        function binPeriodOffset(value) {
+            if (value == 0) return "None";
+            if (value > 0 && value <= 0.002) return "Very Low";
+            if (value > 0.002 && value <= 0.004) return "Low";
+            if (value > 0.004 && value <= 0.006) return "Medium";
+            if (value > 0.006 && value <= 0.008) return "High";
+            return "Very High";
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to print out various parameters in the console
+        function printParameters() {
+            // console.log(`Mode: ${mode}`);
+            // console.log(`System: ${systemRating}`);
+            // console.log(`Perfection score: ${perfectionScore}`);
+            document.getElementById("perfection-score").innerHTML = `System Rating: <b>${systemRating}</b>`;
+
+            // //For testing
+            // console.log(`Color Theme: ${colorTheme}`);
+            // console.log(`Adjusted Score: ${adjustedScore}`);
+            // console.log(`Bonus points: ${bonusPoints}`);
+            // console.log(`lcm: ${lcm}`);
+            // console.log(`scaledValue: ${scaledValue}`)
+            // console.log(`Percentile X: ${dampingPercentileX}`);
+            // console.log(`Percentile Y: ${dampingPercentileY}`);
+            // console.log(`Period ratio: ${periodRatioString}`);
+            // console.log(`Run time: ${runtime}s`);
+            // console.log(`X-period: ${periodX}s`);
+            // console.log(`Y-period: ${periodY}s`);
+            // console.log(`Period Offset: ${periodOffset}s`);
+            // console.log(`X-amplitude: ${amplitudeX.toFixed(1)}`);
+            // console.log(`Y-amplitude: ${amplitudeY.toFixed(1)}`);
+            // console.log(`X-damping: ${dampingX}`);
+            // console.log(`Y-damping: ${dampingY}`);
+            // console.log(`X-phase offset: ${phaseOffsetStringX}`);
+            // console.log(`Y-phase offset: ${phaseOffsetStringY}`);
+            // console.log(`cycleCount: ${cycleCount}`);
+
+            // Post messages to parent window
+            const dataToSend = {
+                systemRating,
+                perfectionScore,
+                lightMode: `${mode} Mode`,
+                lineTypeString,
+                colorTheme,
+                periodRatioString,
+                periodOffset: binPeriodOffset(periodOffset),
+                amplitudeX: binAmplitude(amplitudeX, canvasSize),
+                amplitudeY: binAmplitude(amplitudeY, canvasSize),
+                dampingX: binDamping(dampingX),
+                dampingY: binDamping(dampingY),
+                cycleCount,
+                runtime,
+            };
+            window.parent.postMessage(dataToSend, '*');
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to convert the period ratio to a string by earching the periodRatiosObj
+        function findPeriodRatioString(periodRatiosObj, searchValue) {
+            let epsilon = 1e-10; // Small tolerance for floating-point comparison
+            for (const [key, value] of Object.entries(periodRatiosObj)) {
+                if (abs(value - searchValue) < epsilon) {
+                    return key; // Return the key if the values are "close enough"
+                }
+            }
+            return null; // Return null if no matching key is found
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Convert the phase offsets to a string
+        function findPhaseOffsetString(phaseOffsetObj, searchValue) {
+            let epsilon = 1e-10; // Small tolerance for floating-point comparison
+            for (const [key, value] of Object.entries(phaseOffsetObj)) {
+                if (abs(value - searchValue) < epsilon) {
+                    return key; // Return the key if the values are "close enough"
+                }
+            }
+            return null; // Return null if no matching key is found
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Generate the noise graphics layer to give the canvas some texture
+        function generatePaperTexture() {
+            paperTexture.loadPixels();
+            let d = paperTexture.pixelDensity();
+            for (let y = 0; y < paperTexture.height * d; y++) {
+                for (let x = 0; x < paperTexture.width * d; x++) {
+                    let index = (x + y * paperTexture.width * d) * 4;
+                    exposure = random(1);
+
+                    // Determine the alpha value based on brightness and probability
+                    let alpha;
+                    if (mode === "Dark") {
+                        if (exposure < exposureThreshold) {
+                            alpha = 0;
+                        } else {
+                            if (random(1) < 0.1) {
+                                alpha = random(0, 150);
+                            } else {
+                                alpha = random(0, 50);
+                            }
+                        }
+                    } else {
+                        if (exposure > exposureThreshold) {
+                            alpha = 0;
+                        } else {
+                            if (random(1) < 0.15) {
+                                alpha = random(0, 200);
+                            } else {
+                                alpha = random(0, 75);
+                            }
+                        }
+                    }
+
+                    // Assign the grayscale value and alpha to the paperTexture's pixels
+                    paperTexture.pixels[index + 0] = 255 * exposure; // Red
+                    paperTexture.pixels[index + 1] = 250 * exposure; // Green
+                    paperTexture.pixels[index + 2] = 240 * exposure; // Blue
+                    paperTexture.pixels[index + 3] = alpha; // Correctly set Alpha (transparency level)
+                }
+            }
+            paperTexture.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Genereate an inverse noise graphics layer that gives the lines trokes a graphite pencil appearance
+        function generatePencilTexture() {
+            pencilTexture.loadPixels();
+            let d = pencilTexture.pixelDensity();
+            for (let y = 0; y < pencilTexture.height * d; y++) {
+                for (let x = 0; x < pencilTexture.width * d; x++) {
+                    let index = (x + y * pencilTexture.width * d) * 4; // Correct index calculation
+
+                    // Determine the alpha value based on probability
+                    let alpha;
+                    if (random(1) < 0.50) {
+                        alpha = 0;
+                    } else {
+                        if (random(1) < 0.95) {
+                            alpha = random(0, 75);
+                        } else {
+                            alpha = random(75, 255);
+                        }
+                    }
+                    // Assign the grayscale value and alpha to the pencilTexture's pixels
+                    pencilTexture.pixels[index + 0] = colorRed; // Red
+                    pencilTexture.pixels[index + 1] = colorGreen; // Green
+                    pencilTexture.pixels[index + 2] = colorBlue; // Blue
+                    pencilTexture.pixels[index + 3] = alpha; // Correctly set Alpha (transparency level)
+                }
+            }
+            pencilTexture.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Functon to calculate a random number with a given increment
+        function randomIncrement(min, max, increment) {
+            // Calculate the number of increments between min and max period, T
+            let steps = floor((max - min) / increment);
+
+            // Generate a random step
+            let randomStep = floor(random() * (steps + 1));
+
+            // Calculate the actual value
+            let randomValue = min + randomStep * increment;
+
+            // Ensure the value is rounded to one decimal place to avoid floating-point arithmetic issues
+            return parseFloat(randomValue.toFixed(6));
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Calculate all of the (x, y) coordinates for the pendulum drawing and store them in the trace array
+        function calculateTraceAnimation() {
+            let t = 0;
+            let dt = 1 / fps; // constant timestep
+            let dampingAdjCoeff;
+
+            for (let i = 0; i < totalPoints; i++) {
+
+                if (i != 0) {
+                    dampingAdjCoeff = t / ((1 / fps) * i);
+                } else {
+                    dampingAdjCoeff = 0;
+                }
+
+                let dampX = pow(dampingX, (i * dampingAdjCoeff));
+                let dampY = pow(dampingY, (i * dampingAdjCoeff));
+
+                let x = origin.x + amplitudeX * dampX * sin(TWO_PI * freqX * t + phaseOffsetX);
+                let y = origin.y + amplitudeY * dampY * sin(TWO_PI * freqY * t + phaseOffsetY);
+
+                traceAnimation.push(createVector(x, y));
+
+                // no easing zones, no dt adjustments
+                t += dt;
+            }
+        }
+
+        function calculateTrace() {
+            let t = 0;
+            let dt = 1 / fps; // Change in time per point
+
+            for (let i = 0; i < totalPoints; i++) {
+                let dampX = pow(dampingX, i);
+                let dampY = pow(dampingY, i);
+
+                let x = origin.x + amplitudeX * dampX * sin(TWO_PI * freqX * t + phaseOffsetX);
+                let y = origin.y + amplitudeY * dampY * sin(TWO_PI * freqY * t + phaseOffsetY);
+
+                trace.push(createVector(x, y));
+
+                t += dt;
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Draw out the pendulum pattern
+        function drawTrace() {
+            background(colorRed, colorGreen, colorBlue);
+            noFill();
+            stroke(strokeColorRed, strokeColorGreen, strokeColorBlue, strokeAlpha);
+            strokeCap(PROJECT);
+            strokeWeight(strokeSize);
+
+            if (lineType === null) {
+                beginShape();
+            } else {
+                beginShape(lineType);
+            }
+
+            for (let v of trace) {
+                vertex(v.x, v.y);
+            }
+            endShape();
+
+            image(paperTexture, 0, 0);
+            image(pencilTexture, 0, 0);
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Draw the pendulum pattern with animation 
+        function draw() {
+            if (animateDrawing) {
+                background(colorRed, colorGreen, colorBlue);
+                noFill();
+                stroke(strokeColorRed, strokeColorGreen, strokeColorBlue, strokeAlpha);
+                strokeWeight(strokeSize);
+
+                if (lineType === null) {
+                    beginShape();
+                } else {
+                    beginShape(lineType);
+                }
+
+                // Draw the visible portion of the line based on the currentPoint
+                for (let i = 0; i <= currentPoint && i < traceAnimation.length; i++) {
+                    vertex(traceAnimation[i].x, traceAnimation[i].y);
+                }
+
+                endShape();
+
+                image(paperTexture, 0, 0);
+                image(pencilTexture, 0, 0);
+
+                // Check which animation state the piece should be in
+                let stepSize = animateDrawingFirst ? (totalPoints * 0.0075) : 1;
+                if (clickState === 0) {
+                    if (!animateDrawingFirst) {
+                        fill(strokeColorRed, strokeColorGreen, strokeColorBlue, strokeAlpha);
+                        ellipse(traceAnimation[currentPoint].x, traceAnimation[currentPoint].y, ellipseSize, ellipseSize);
+                    }
+                    if (traceForward) {
+                        currentPoint += stepSize;
+                        if (currentPoint >= traceAnimation.length - 1) {
+                            currentPoint = traceAnimation.length - 1; // Ensure currentPoint stays within bounds
+                            if (animateDrawingFirst) {
+                                // First pass on load just ends, no reverse
+                                animateDrawingFirst = false;
+                                clickState = 1;
+                            } else {
+                                // Normal behavior: reverse
+                                traceForward = false;
+                            }
+                        }
+                    } else {
+                        if (!animateDrawingFirst) {
+                            currentPoint -= stepSize;
+
+                            if (currentPoint < 0) {
+                                currentPoint = 0;
+                                traceForward = true;
+                            }
+                        }
+                    }
+                } else {
+                    clickState = 1;
+                    animateDrawing = false;
+                    ellipseSize = canvasSize / 200;
+                }
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Detect if the canvas was clicked on mobile
+        function touchEnded() {
+            if (clickState === 0) {
+                clickState = 1;
+                animateDrawing = false;
+                drawTrace();
+            } else if (clickState === 1) {
+                clickState = 0;
+                currentPoint = 0;
+                animateDrawing = true;
+                draw();
+            }
+            return false; // Prevent default behavior
+        }
+
+
+        /////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////
+
+
+        // ========================
+        // HIGH RESOLUTION DOWNLOAD
+        // ========================        
+        // The below section is triggered when the user saves a high resolution version
+
+        // Generate the high res noise graphics layer for paper texture
+        function generatePaperTextureHighRes() {
+            paperTextureHighRes.loadPixels();
+            let d = paperTextureHighRes.pixelDensity();
+            for (let y = 0; y < paperTextureHighRes.height * d; y++) {
+                for (let x = 0; x < paperTextureHighRes.width * d; x++) {
+                    let index = (x + y * paperTextureHighRes.width * d) * 4; // Correct index calculation
+                    exposure = random(1);
+
+                    // Determine the alpha value based on brightness and probability
+                    let alpha;
+                    if (exposure > exposureThreshold) {
+                        alpha = 0;
+                    } else {
+                        if (random(1) < 0.15) {
+                            alpha = random(0, 200);
+                        } else {
+                            alpha = random(0, 100);
+                        }
+                    }
+
+                    // Assign the grayscale value and alpha to the paperTextureHighRes's pixels
+                    paperTextureHighRes.pixels[index + 0] = 255 * exposure; // Red
+                    paperTextureHighRes.pixels[index + 1] = 250 * exposure; // Green
+                    paperTextureHighRes.pixels[index + 2] = 240 * exposure; // Blue
+                    paperTextureHighRes.pixels[index + 3] = alpha; // Correctly set Alpha (transparency level)
+                }
+            }
+            paperTextureHighRes.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Generate the high res noise graphics layer for line texture
+        function generatePencilTextureHighRes() {
+            pencilTextureHighRes.loadPixels();
+            let d = pencilTextureHighRes.pixelDensity();
+            for (let y = 0; y < pencilTextureHighRes.height * d; y++) {
+                for (let x = 0; x < pencilTextureHighRes.width * d; x++) {
+                    let index = (x + y * pencilTextureHighRes.width * d) * 4; // Correct index calculation
+
+                    // Determine the alpha value based on probability
+                    let alpha;
+                    if (random(1) < 0.50) {
+                        alpha = 0;
+                    } else {
+                        if (random(1) < 0.94) {
+                            alpha = random(0, 75);
+                        } else {
+                            alpha = random(75, 255);
+                        }
+                    }
+                    // Assign the grayscale value and alpha to the pencilTextureHighRes's pixels
+                    pencilTextureHighRes.pixels[index + 0] = colorRed; // Red
+                    pencilTextureHighRes.pixels[index + 1] = colorGreen; // Green
+                    pencilTextureHighRes.pixels[index + 2] = colorBlue; // Blue
+                    pencilTextureHighRes.pixels[index + 3] = alpha; // Correctly set Alpha (transparency level)
+                }
+            }
+            pencilTextureHighRes.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Draw out the high res pendulum pattern
+        function drawHighRes(gfx) {
+            gfx.background(colorRed, colorGreen, colorBlue);
+            gfx.noFill();
+            gfx.stroke(strokeColorRed, strokeColorGreen, strokeColorBlue, strokeAlpha);
+            gfx.strokeWeight(strokeSize);
+
+            // Adjusted size parameters for high-res drawing
+            let scaleRatio = highResCanvasSize / canvasSize; // Calculate scale ratio
+
+            // Example drawing logic, scaled for high resolution
+            if (lineType === null) {
+                gfx.beginShape();
+            } else {
+                gfx.beginShape(lineType);
+            }
+
+            for (let v of trace) {
+                gfx.vertex(v.x * scaleRatio, v.y * scaleRatio);
+            }
+            gfx.endShape();
+
+            gfx.image(paperTextureHighRes, 0, 0);
+            gfx.image(pencilTextureHighRes, 0, 0);
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Download the high resolution output as a jpeg
+        function downloadHighResImage(highResCanvasSize, strokeSize, pixelDensityValue, filename) {
+            alert("You have triggered a high-resolution download of this piece.  \nSelect 'OK' to continue.  \n\n(Please keep this window open until download is complete)");
+            let highResCanvas = createGraphics(highResCanvasSize, highResCanvasSize);
+            paperTextureHighRes = createGraphics(highResCanvasSize, highResCanvasSize);
+            paperTextureHighRes.pixelDensity(pixelDensityValue);
+            pencilTextureHighRes = createGraphics(highResCanvasSize, highResCanvasSize);
+            pencilTextureHighRes.pixelDensity(pixelDensityValue);
+            generatePaperTextureHighRes();
+            generatePencilTextureHighRes();
+            drawHighRes(highResCanvas);
+
+            // Use toDataURL for saving
+            let dataURL = highResCanvas.elt.toDataURL('image/jpeg');
+            let link = document.createElement('a');
+            link.download = filename;
+            link.href = dataURL;
+            link.click();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to trigger the high-res redraw and download process
+        function triggerHighResDownload() {
+            console.log("Save Trigged");
+            prevPixelDensity = pixelDensityValue;
+            prevStrokeSize = strokeSize;
+            highResCanvasSize = 2500;
+            strokeSize = 1.75;
+            pixelDensityValue = 1.25;
+            filename = `${systemRating}-${seedValue}.jpeg`;
+            downloadHighResImage(highResCanvasSize, strokeSize, pixelDensityValue, filename);
+            pixelDensityValue = prevPixelDensity;
+            strokeSize = prevStrokeSize;
+        }
+
+        // Detect if the "s" key was pressed by the user, triggering the high-res redraw and download process
+        function keyPressed() {
+            if (key === "s" || key === "S") {
+                triggerHighResDownload();
+                return false;
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to capture canvas and send to parent
+
+        const allowedOrigins = [
+            "https://www.pursuitofequilibrium.com",
+            "https://bendulums.webflow.io"
+        ];
+
+        let lastVerifiedOrigin = null;
+
+        // Listen for a request from parent to grab the canvas
+        window.addEventListener("message", (event) => {
+            if (!allowedOrigins.includes(event.origin)) {
+                console.warn(`Blocked message from untrusted origin: ${event.origin}`);
+                return;
+            }
+
+            console.log(`✅ Verified message from: ${event.origin}`);
+
+            if (event.data?.type === "download-canvas") {
+                lastVerifiedOrigin = event.origin;
+                console.log(`Last verified origin: ${lastVerifiedOrigin}`);
+                if (typeof window.downloadCurrentCanvas === "function") {
+                    window.downloadCurrentCanvas();
+                }
+            }
+        });
+
+        // Function to capture canvas and send to parent
+        window.downloadCurrentCanvas = function () {
+            const canvas = document.querySelector("canvas");
+            if (!canvas) {
+                console.error("Canvas not found.");
+                return;
+            }
+
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    console.error("Failed to convert canvas to blob.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    if (!lastVerifiedOrigin) {
+                        console.error("No verified origin to send canvas to.");
+                        return;
+                    }
+
+                    window.parent.postMessage({
+                        type: "canvas-image",
+                        dataUrl: reader.result,
+                    }, lastVerifiedOrigin);
+                };
+                reader.readAsDataURL(blob);
+            }, "image/png");
+        };
+    </script>
+</body>
+
+</html>

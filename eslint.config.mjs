@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local reference assets used during rebuilds.
+    "reference-materials/**",
   ]),
 ]);
 

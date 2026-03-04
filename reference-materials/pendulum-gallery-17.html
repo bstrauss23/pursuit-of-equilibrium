@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pendulums Gallery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
+
+        :root {
+            --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --page-bg: transparent;
+            --panel-bg: #fffcf7;
+            --canvas-bg: transparent;
+            --ink: #1f1d1a;
+            --ink-muted: #6c665d;
+            --border: #2f2c28;
+            --border-soft: rgba(47, 44, 40, 0.3);
+            --accent: #c7b695;
+            --shadow: 0 2px 5px #0003;
+            color-scheme: light;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-mono);
+            background: var(--canvas-bg);
+            color: var(--ink);
+            overflow-x: hidden;
+        }
+
+        .wrap {
+            display: grid;
+            grid-template-columns: minmax(280px, 320px) 1fr;
+            height: 100vh;
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            background: transparent;
+            box-shadow: 0 2px 5px #0003;
+        }
+
+        .panelToggle {
+            display: none;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .mobileControls {
+            display: none;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .panelBody {
+            display: block;
+        }
+
+            .main {
+                padding: 16px;
+                box-sizing: border-box;
+                background: transparent;
+                height: 100vh;
+                overflow: auto;
+                min-width: 0;
+            }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .row > * {
+            min-width: 0;
+            flex: 1 1 140px;
+        }
+
+        input,
+        select,
+        button {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            color: var(--ink);
+            padding: 10px 12px;
+            border-radius: 0;
+            outline: none;
+            font-family: var(--font-mono);
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--ink);
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #e5e0d6;
+            border-color: var(--border);
+        }
+
+        .muted {
+            color: var(--ink-muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-soft);
+        }
+
+        .panelBody > .section:first-of-type {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .filtersSection {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .filtersSection .traitTitle {
+            margin-top: 10px;
+        }
+
+        .filtersDrawer {
+            margin-top: 8px;
+        }
+
+        .filtersDrawerHeader,
+        .filtersDrawerTitle,
+        .filtersDrawerClose {
+            display: none;
+        }
+
+        .traitBlock {
+            margin-top: 12px;
+        }
+
+        .traitSection {
+            border: 1px solid var(--border);
+            border-radius: 0;
+            padding: 6px 10px;
+            background: var(--panel-bg);
+        }
+
+        .traitSection + .traitSection {
+            margin-top: 10px;
+        }
+
+        .traitSection summary {
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .traitSection summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .traitSummaryTitle {
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .traitTitle {
+            font-size: 13px;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 0;
+            margin: 4px 6px 0 0;
+            background: #f3ecdf;
+            user-select: none;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .pill input {
+            width: auto;
+        }
+
+        .appliedFilters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .appliedTag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 8px;
+            border: 1px solid var(--border);
+            background: #f3ecdf;
+            font-size: 11px;
+        }
+
+        .appliedTag button {
+            border: none;
+            background: transparent;
+            padding: 0;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--ink-muted);
+        }
+
+        .switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--ink-muted);
+            user-select: none;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .switchTrack {
+            width: 34px;
+            height: 18px;
+            background: #d9d3c8;
+            border: 1px solid var(--border-soft);
+            border-radius: 0;
+            position: relative;
+            transition: background 160ms ease, border-color 160ms ease;
+        }
+
+        .switchTrack::after {
+            content: "";
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 14px;
+            height: 14px;
+            background: var(--panel-bg);
+            border-radius: 0;
+            border: 1px solid var(--border-soft);
+            transition: transform 160ms ease, background 160ms ease;
+        }
+
+        .switch input:checked + .switchTrack {
+            background: var(--accent);
+            border-color: var(--border);
+        }
+
+        .switch input:checked + .switchTrack::after {
+            transform: translateX(16px);
+            background: var(--panel-bg);
+        }
+
+        .switchLabel {
+            font-size: 11px;
+            color: var(--ink-muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 0;
+            overflow: hidden;
+            background: var(--panel-bg);
+            transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+            cursor: pointer;
+            box-shadow: 0 2px 5px #0003;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+            border-color: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .thumb {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: block;
+            background: var(--canvas-bg);
+        }
+
+        .meta {
+            padding: 10px 12px 12px 12px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .name {
+            font-size: 13px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 12px;
+            color: var(--ink-muted);
+        }
+
+        .topbar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .count {
+            font-size: 13px;
+            color: var(--ink-muted);
+        }
+
+        .sentinel {
+            height: 1px;
+        }
+
+        .loading {
+            padding: 16px 0;
+            color: var(--ink-muted);
+            font-size: 13px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(47, 44, 40, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 50;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modalCard {
+            width: min(1100px, 94vw);
+            max-height: 82vh;
+            overflow: auto;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 0;
+            padding: 16px;
+            box-sizing: border-box;
+            box-shadow: var(--shadow);
+        }
+
+        .modalHeader {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .modalImage {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 0;
+            border: 1px solid var(--border-soft);
+            background: var(--canvas-bg);
+            object-fit: cover;
+            display: block;
+        }
+
+        .modalFrame {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 0;
+            border: 1px solid var(--border-soft);
+            background: var(--canvas-bg);
+            display: none;
+        }
+
+        .modalTop {
+            display: grid;
+            grid-template-columns: minmax(320px, 1.1fr) minmax(260px, 0.9fr);
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .modalMedia {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modalAttrs {
+            max-height: 62vh;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .modalLink {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 0;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .modalLink:hover {
+            background: #e5e0d6;
+            border-color: var(--border);
+        }
+
+        .modalDescription {
+            color: var(--ink-muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .modalTitle {
+            font-size: 15px;
+            color: var(--ink);
+        }
+
+        .modalClose {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            color: var(--ink);
+            border-radius: 0;
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+
+        .attrList {
+            display: grid;
+            gap: 8px;
+        }
+
+        .attrRow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 10px;
+            border: 1px solid var(--border-soft);
+            border-radius: 0;
+            background: var(--canvas-bg);
+            font-size: 12px;
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .attrRow.rareGlow {
+            border-color: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .attrRow.ignored {
+            opacity: 0.55;
+            filter: grayscale(0.2);
+        }
+
+        .attrName {
+            color: var(--ink-muted);
+        }
+
+        @media (max-width: 900px) {
+            .wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                position: fixed;
+                inset: 0;
+                height: 100vh;
+                overflow: auto;
+                max-height: 100vh;
+                border: 1px solid var(--border);
+                background: var(--panel-bg);
+                z-index: 60;
+                display: none;
+            }
+
+            .panelToggle {
+                display: inline-flex;
+            }
+
+            .mobileControls {
+                display: inline-flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+                background: var(--panel-bg);
+                border-bottom: 1px solid var(--border);
+                padding: 12px 16px;
+            }
+
+            .panelBody {
+                display: none;
+            }
+
+            .panel.open .panelBody {
+                display: block;
+            }
+
+            .panel.open {
+                display: block;
+            }
+
+            .main {
+                padding-top: 64px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .modalTop {
+                grid-template-columns: 1fr;
+            }
+
+            .modalCard {
+                width: min(860px, 92vw);
+                overflow: auto;
+            }
+
+            .modalAttrs {
+                max-height: none;
+                overflow: visible;
+                padding-right: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <aside class="panel">
+            <button class="panelToggle button" id="panelToggle">Close</button>
+            <div class="panelBody" id="panelBody">
+                <div class="row">
+                    <input id="search" placeholder="Search name or token id" />
+                </div>
+
+                <div class="section">
+                    <div class="row">
+                        <select id="sort">
+                            <option value="token_asc">Token id, low to high</option>
+                            <option value="token_desc">Token id, high to low</option>
+                            <option value="perfection_desc">Perfection Score, high to low</option>
+                            <option value="perfection_asc">Perfection Score, low to high</option>
+                            <option value="cycle_desc">Cycle Count, high to low</option>
+                            <option value="cycle_asc">Cycle Count, low to high</option>
+                        </select>
+                        <button id="clear">Clear</button>
+                    </div>
+                </div>
+
+                <div class="section filtersSection" id="filtersSection">
+                    <div class="traitTitle">Filters</div>
+                    <div class="appliedFilters" id="appliedFilters"></div>
+                    <div class="filtersDrawer">
+                        <div id="filters"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <button class="mobileControls button" id="mobileControlsOpen">Filters</button>
+            <div class="topbar">
+                <div class="muted" id="status"></div>
+            </div>
+
+            <div class="grid" id="grid"></div>
+            <div class="sentinel" id="sentinel"></div>
+            <div class="loading" id="loading" style="display:none">Loading more…</div>
+        </main>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modalHeader">
+                <div class="modalTitle" id="modalTitle"></div>
+                <button class="modalClose" id="modalClose">Close</button>
+            </div>
+            <div class="modalTop">
+                <div class="modalMedia">
+                    <iframe class="modalFrame" id="modalFrame" title=""></iframe>
+                    <img class="modalImage" id="modalImage" alt="" />
+                    <a class="modalLink" id="modalLink" href="" target="_blank" rel="noopener noreferrer">View on OpenSea</a>
+                    <div class="modalDescription" id="modalDescription"></div>
+                </div>
+                <div class="modalAttrs">
+                    <div class="attrList" id="modalBody"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DATA_URL = "./pendulums_1-512.json";
+        const PARENT_IFRAME_ID = "algorithm-iframe";
+
+        const elGrid = document.getElementById("grid");
+        const elMain = document.querySelector(".main");
+        const elStatus = document.getElementById("status");
+        const elFilters = document.getElementById("filters");
+        const elFiltersSection = document.getElementById("filtersSection");
+        const elAppliedFilters = document.getElementById("appliedFilters");
+        const elSearch = document.getElementById("search");
+        const elSort = document.getElementById("sort");
+        const elClear = document.getElementById("clear");
+        const elSentinel = document.getElementById("sentinel");
+        const elLoading = document.getElementById("loading");
+        const elModal = document.getElementById("modal");
+        const elModalTitle = document.getElementById("modalTitle");
+        const elModalBody = document.getElementById("modalBody");
+        const elModalClose = document.getElementById("modalClose");
+        const elModalImage = document.getElementById("modalImage");
+        const elModalFrame = document.getElementById("modalFrame");
+        const elModalDescription = document.getElementById("modalDescription");
+        const elModalLink = document.getElementById("modalLink");
+        const elPanel = document.querySelector(".panel");
+        const elPanelToggle = document.getElementById("panelToggle");
+        const elMobileControlsOpen = document.getElementById("mobileControlsOpen");
+
+        const PAGE_SIZE = 60;
+
+        let all = [];
+        let view = [];
+        let rendered = 0;
+
+        let traitTypes = [];
+        let countsByTypeValue = new Map(); // type -> Map(value -> count)
+
+        let selected = new Map(); // type -> Set(values)
+
+        function norm(s) {
+            return String(s ?? "").trim();
+        }
+
+        function getAttrMap(item) {
+            const m = new Map();
+            for (const a of (item.attributes || [])) {
+                const t = norm(a.trait_type);
+                if (!t) continue;
+                m.set(t, norm(a.value));
+            }
+            return m;
+        }
+
+        function getAttrValue(attributes, traitName) {
+            const target = norm(traitName).toLowerCase();
+            for (const a of (attributes || [])) {
+                const t = norm(a.trait_type).toLowerCase();
+                if (t === target) return a.value;
+            }
+            return null;
+        }
+
+        function toNumber(value) {
+            if (value === null || value === undefined) return null;
+            const n = Number(String(value).replace(/,/g, ""));
+            return Number.isFinite(n) ? n : null;
+        }
+
+        function compareNumeric(a, b, dir) {
+            if (a === null && b === null) return 0;
+            if (a === null) return 1;
+            if (b === null) return -1;
+            return dir * (a - b);
+        }
+
+        function buildCounts(items) {
+            const typesSet = new Set();
+            const typeValueCounts = new Map();
+
+            for (const item of items) {
+                for (const a of (item.attributes || [])) {
+                    const t = norm(a.trait_type);
+                    const v = norm(a.value);
+                    if (!t) continue;
+                    typesSet.add(t);
+                    if (!typeValueCounts.has(t)) typeValueCounts.set(t, new Map());
+                    const m = typeValueCounts.get(t);
+                    m.set(v, (m.get(v) || 0) + 1);
+                }
+            }
+
+            const types = Array.from(typesSet).sort((a, b) => a.localeCompare(b));
+            traitTypes = types;
+            countsByTypeValue = typeValueCounts;
+        }
+
+        function buildFilterUi(items) {
+            elFilters.innerHTML = "";
+
+            // For each trait type, show values and counts
+            for (const t of traitTypes) {
+                const m = countsByTypeValue.get(t) || new Map();
+                const values = Array.from(m.entries())
+                    .map(([v, c]) => ({ v, c }))
+                    .sort((a, b) => a.c - b.c || a.v.localeCompare(b.v));
+
+                const details = document.createElement("details");
+                details.className = "traitSection";
+
+                const summary = document.createElement("summary");
+
+                const title = document.createElement("div");
+                title.className = "traitSummaryTitle";
+                title.textContent = t;
+                summary.appendChild(title);
+
+                details.appendChild(summary);
+
+                const wrap = document.createElement("div");
+                wrap.className = "traitBlock";
+
+                // show all values, but you can cap if it becomes too big
+                for (const { v, c } of values) {
+                    const pill = document.createElement("label");
+                    pill.className = "pill";
+
+                    const cb = document.createElement("input");
+                    cb.type = "checkbox";
+                    cb.dataset.trait = t;
+                    cb.dataset.value = v;
+                    cb.addEventListener("change", () => {
+                        if (!selected.has(t)) selected.set(t, new Set());
+                        const set = selected.get(t);
+                        if (cb.checked) set.add(v);
+                        else set.delete(v);
+                        if (set.size === 0) selected.delete(t);
+                        apply();
+                    });
+
+                    const txt = document.createElement("span");
+                    txt.textContent = `${v} (${c})`;
+
+                    pill.appendChild(cb);
+                    pill.appendChild(txt);
+                    wrap.appendChild(pill);
+                }
+
+                details.appendChild(wrap);
+                elFilters.appendChild(details);
+            }
+        }
+
+        function passesFilters(item) {
+            const q = norm(elSearch.value).toLowerCase();
+            if (q) {
+                const name = norm(item.name).toLowerCase();
+                const tid = String(item.token_id ?? "");
+                if (!name.includes(q) && !tid.includes(q)) return false;
+            }
+
+            if (selected.size === 0) return true;
+
+            const attrs = getAttrMap(item);
+            for (const [t, values] of selected.entries()) {
+                const v = attrs.get(t);
+                if (!values.has(v)) return false;
+            }
+            return true;
+        }
+
+        function sortView(items) {
+            const mode = elSort.value;
+            const arr = items.slice();
+
+            if (mode === "token_asc") arr.sort((a, b) => (a.token_id || 0) - (b.token_id || 0));
+            if (mode === "token_desc") arr.sort((a, b) => (b.token_id || 0) - (a.token_id || 0));
+            if (mode === "perfection_asc") arr.sort((a, b) => compareNumeric(a.perfection_score, b.perfection_score, 1));
+            if (mode === "perfection_desc") arr.sort((a, b) => compareNumeric(a.perfection_score, b.perfection_score, -1));
+            if (mode === "cycle_asc") arr.sort((a, b) => compareNumeric(a.cycle_count, b.cycle_count, 1));
+            if (mode === "cycle_desc") arr.sort((a, b) => compareNumeric(a.cycle_count, b.cycle_count, -1));
+
+            return arr;
+        }
+
+        function resetGrid() {
+            elGrid.innerHTML = "";
+            rendered = 0;
+        }
+
+        function renderNextPage() {
+            const next = view.slice(rendered, rendered + PAGE_SIZE);
+            if (next.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            for (const item of next) {
+                frag.appendChild(makeCard(item));
+            }
+            elGrid.appendChild(frag);
+
+            rendered += next.length;
+            
+        }
+
+        function makeCard(item) {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.dataset.tokenId = String(item.token_id ?? "");
+            const sortMode = elSort.value;
+
+            const img = document.createElement("img");
+            img.className = "thumb";
+            img.alt = item.name || `Token ${item.token_id}`;
+            img.dataset.src = item.image_uri || "";
+            img.loading = "lazy";
+            img.decoding = "async";
+            img.referrerPolicy = "no-referrer";
+
+            const meta = document.createElement("div");
+            meta.className = "meta";
+
+            const name = document.createElement("div");
+            name.className = "name";
+            name.textContent = item.name || "Untitled";
+
+            meta.appendChild(name);
+
+            if (sortMode.startsWith("perfection_")) {
+                const badge = document.createElement("div");
+                badge.className = "badge";
+                badge.textContent = `Perfection Score: ${item.perfection_score ?? "n/a"}`;
+                meta.appendChild(badge);
+            } else if (sortMode.startsWith("cycle_")) {
+                const badge = document.createElement("div");
+                badge.className = "badge";
+                badge.textContent = `Cycle Count: ${item.cycle_count ?? "n/a"}`;
+                meta.appendChild(badge);
+            }
+
+            card.appendChild(img);
+            card.appendChild(meta);
+
+            ioImages.observe(img);
+            return card;
+        }
+
+        function notifyParentToCenterIframe() {
+            if (!window.parent || window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: "center-iframe",
+                    iframeId: PARENT_IFRAME_ID
+                }, "*");
+            } catch (err) {
+                console.warn("Unable to notify parent for scroll.", err);
+            }
+        }
+
+        function openModal(item) {
+            elModalTitle.textContent = item.name || `Token ${item.token_id}`;
+            const title = item.name || `Token ${item.token_id}`;
+            elModalImage.alt = title;
+            elModalImage.src = item.image_uri || "";
+            elModalFrame.title = title;
+
+            if (item.animation_url) {
+                elModalFrame.src = item.animation_url;
+                elModalFrame.style.display = "block";
+                elModalImage.style.display = "none";
+            } else {
+                elModalFrame.removeAttribute("src");
+                elModalFrame.style.display = "none";
+                elModalImage.style.display = "block";
+            }
+            elModalBody.innerHTML = "";
+            elModalDescription.textContent = "Pendulums began as a simulator, a way to preview the motion behind Chapter 1: Lux, a series of physical pendulum photographs shaped by light and time. But the code started to feel like something more. Each piece in Chapter 2 is the trace of a system in motion, governed by real physics: damping, amplitude, period ratios, decay. These are not imagined curves, but paths shaped by natural law, rendered in code. Some settle. Some resist. Each image is a fossil of energy resolving into stillness, a quiet record of the universe at work.";
+            elModalLink.href = `https://opensea.io/assets/ethereum/0x4af0370076a44c8ddc23db9ae5cecba669280372/${item.token_id}`;
+
+            const attrs = Array.isArray(item.attributes) ? item.attributes : [];
+            if (attrs.length === 0) {
+                const row = document.createElement("div");
+                row.className = "attrRow";
+                row.textContent = "No attributes";
+                elModalBody.appendChild(row);
+            } else {
+                for (const a of attrs) {
+                    const t = norm(a.trait_type);
+                    const v = norm(a.value);
+
+                    const row = document.createElement("div");
+                    row.className = "attrRow";
+                    row.addEventListener("click", () => {
+                        if (!t || !v) return;
+                        const set = new Set([v]);
+                        selected.set(t, set);
+
+                        // Update checkboxes for this trait
+                        elFilters.querySelectorAll("input[type=checkbox]").forEach((cb) => {
+                            if (cb.dataset.trait !== t) return;
+                            cb.checked = cb.dataset.value === v;
+                        });
+
+                        apply();
+                        closeModal();
+                    });
+
+                    const name = document.createElement("div");
+                    name.className = "attrName";
+                    name.textContent = t;
+
+                    const value = document.createElement("div");
+                    value.textContent = v;
+
+                    row.appendChild(name);
+                    row.appendChild(value);
+                    elModalBody.appendChild(row);
+                }
+            }
+
+            elModal.classList.add("open");
+            notifyParentToCenterIframe();
+        }
+
+        function closeModal() {
+            if (elModalFrame) elModalFrame.removeAttribute("src");
+            elModal.classList.remove("open");
+        }
+
+        function apply() {
+            resetGrid();
+            const filtered = all.filter(passesFilters);
+            view = sortView(filtered);
+            renderAppliedFilters();
+            renderNextPage();
+        }
+
+        function renderAppliedFilters() {
+            if (!elAppliedFilters) return;
+            elAppliedFilters.innerHTML = "";
+            if (selected.size === 0) return;
+
+            for (const [t, values] of selected.entries()) {
+                for (const v of values) {
+                    const tag = document.createElement("div");
+                    tag.className = "appliedTag";
+
+                    const label = document.createElement("span");
+                    label.textContent = `${t}: ${v}`;
+
+                    const close = document.createElement("button");
+                    close.type = "button";
+                    close.textContent = "×";
+                    close.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        const set = selected.get(t);
+                        if (set) {
+                            set.delete(v);
+                            if (set.size === 0) selected.delete(t);
+                        }
+
+                        elFilters.querySelectorAll("input[type=checkbox]").forEach((cb) => {
+                            if (cb.dataset.trait === t && cb.dataset.value === v) {
+                                cb.checked = false;
+                            }
+                        });
+
+                        apply();
+                    });
+
+                    tag.appendChild(label);
+                    tag.appendChild(close);
+                    elAppliedFilters.appendChild(tag);
+                }
+            }
+        }
+
+        const ioImages = new IntersectionObserver((entries) => {
+            for (const e of entries) {
+                if (!e.isIntersecting) continue;
+                const img = e.target;
+                ioImages.unobserve(img);
+                const src = img.dataset.src;
+                if (src) img.src = src;
+            }
+        }, { root: elMain, rootMargin: "800px 0px" });
+
+        function loadMoreIfNeeded() {
+            if (rendered >= view.length) return;
+            if (!elMain) return;
+            const remaining = elMain.scrollHeight - elMain.scrollTop - elMain.clientHeight;
+            if (remaining > 800) return;
+            elLoading.style.display = "block";
+            requestAnimationFrame(() => {
+                renderNextPage();
+                elLoading.style.display = "none";
+            });
+        }
+
+        const ioMore = new IntersectionObserver((entries) => {
+            for (const e of entries) {
+                if (!e.isIntersecting) continue;
+                loadMoreIfNeeded();
+            }
+        }, { root: elMain, rootMargin: "1600px 0px" });
+
+
+        function resetStateForReload() {
+            ioMore.disconnect();
+            ioImages.disconnect();
+            resetGrid();
+            elFilters.innerHTML = "";
+            selected = new Map();
+            traitTypes = [];
+            countsByTypeValue = new Map();
+        }
+
+        async function loadData(url) {
+            elStatus.textContent = "Loading physics...";
+            resetStateForReload();
+            const res = await fetch(url, { cache: "no-store" });
+            const items = await res.json();
+
+            all = items
+                .map((x) => ({
+                    token_id: Number(x.token_id),
+                    name: x.name,
+                    image_uri: x.image_uri,
+                    animation_url: x.animation_url,
+                    attributes: Array.isArray(x.attributes) ? x.attributes : [],
+                    perfection_score: toNumber(getAttrValue(x.attributes, "Perfection Score")),
+                    cycle_count: toNumber(getAttrValue(x.attributes, "Cycle Count"))
+                }))
+                .sort((a, b) => a.token_id - b.token_id);
+
+            elStatus.textContent = "Building filters…";
+            buildCounts(all);
+            buildFilterUi(all);
+
+            elStatus.textContent = "";
+            apply();
+
+            ioMore.observe(elSentinel);
+        }
+
+        elSearch.addEventListener("input", () => apply());
+        elSearch.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter") return;
+            if (elPanel) elPanel.classList.remove("open");
+        });
+        elSort.addEventListener("change", () => apply());
+        elModalClose.addEventListener("click", () => closeModal());
+        elModal.addEventListener("click", (e) => {
+            if (e.target === elModal) closeModal();
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeModal();
+        });
+        elGrid.addEventListener("click", (e) => {
+            const card = e.target.closest(".card");
+            if (!card) return;
+            const tokenId = Number(card.dataset.tokenId);
+            const item = all.find((x) => x.token_id === tokenId);
+            if (item) openModal(item);
+        });
+
+        elClear.addEventListener("click", () => {
+            elSearch.value = "";
+            selected.clear();
+
+            // reset all checkboxes
+            elFilters.querySelectorAll("input[type=checkbox]").forEach((cb) => cb.checked = false);
+
+            apply();
+        });
+
+        if (elMain) {
+            let scrollTick = false;
+            elMain.addEventListener("scroll", () => {
+                if (scrollTick) return;
+                scrollTick = true;
+                requestAnimationFrame(() => {
+                    loadMoreIfNeeded();
+                    scrollTick = false;
+                });
+            }, { passive: true });
+        }
+
+        if (elPanel && elPanelToggle) {
+            elPanelToggle.addEventListener("click", () => {
+                elPanel.classList.toggle("open");
+            });
+        }
+
+        if (elPanel && elMobileControlsOpen) {
+            elMobileControlsOpen.addEventListener("click", () => {
+                elPanel.classList.add("open");
+            });
+        }
+
+        loadData(DATA_URL).catch((err) => {
+            console.error(err);
+            elStatus.textContent = "Error loading or parsing JSON";
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,155 @@
+<script>
+    const pendulumScript = "https://cdn.transientlabs.xyz/tlx/pendulums/Pendulums-23.html";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const iframe = document.getElementById("algorithm-iframe");
+        const generateBtn = document.getElementById("refresh-iframe-btn");
+
+        const testnet = window.location.hostname.endsWith("webflow.io");
+
+        // Set chain ids
+        for (const btn of document.getElementsByTagName("tl-siwe-button")) {
+            btn.setAttribute("chain-id", testnet ? "11155111" : "1");
+        }
+
+        const fields = [
+            "systemRating", "perfectionScore", "lightMode", "lineTypeString", "colorTheme",
+            "periodRatioString", "periodOffset",
+            "amplitudeX", "amplitudeY", "dampingX", "dampingY", "cycleCount", "runtime"
+        ];
+
+        let currentPerfectionScore = null;
+        let currentSystemRating = null;
+
+        function generateSeededSrc() {
+            window.seedValue = Math.floor(Math.random() * 2 ** 32);
+            console.log("Seed:", window.seedValue);
+            return `${pendulumScript}?seed=${window.seedValue}`;
+        }
+
+        function refreshIframe() {
+            if (!iframe) return;
+            iframe.src = "";
+            setTimeout(() => {
+                iframe.src = generateSeededSrc();
+            }, 10);
+        }
+
+        // Initial load
+        if (iframe) iframe.src = generateSeededSrc();
+
+        // Generate new output
+        if (generateBtn) {
+            generateBtn.addEventListener("click", () => {
+                fields.forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        const label = el.textContent.split(":")[0];
+                        el.textContent = label + ":";
+                    }
+                });
+                refreshIframe();
+            });
+        }
+
+        // Sharing to X //
+
+        function closeMobileModal() {
+            const modal = document.getElementById("mobile-canvas-modal");
+            const backdrop = document.getElementById("info-backdrop-overlay");
+            if (modal) modal.style.display = "none";
+            if (backdrop) backdrop.style.display = "none";
+            mobileModalOpen = false;
+        }
+
+        const closeBtn = document.getElementById("mobile-modal-close");
+        if (closeBtn) {
+            closeBtn.addEventListener("click", closeMobileModal);
+        }
+
+        let pendingTweetURL = null;
+        let mobileModalOpen = false;
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        // Share button(s)
+        const allShareButtons = document.querySelectorAll(".sharetox");
+
+        allShareButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                // If modal is already open, user is clicking second button → finalize share
+                if (isMobile && mobileModalOpen) {
+                    if (pendingTweetURL) {
+                        window.open(pendingTweetURL, "_blank");
+                        pendingTweetURL = null;
+                    }
+                    return;
+                }
+
+                // Otherwise (first click), generate tweet + request canvas
+                const tweetText = encodeURIComponent(
+                    `Just rolled this output from Pendulums by @benstraussphoto\nSystem Rating: ${currentSystemRating}\nPerfection Score: ${currentPerfectionScore}/100`
+                );
+                pendingTweetURL = `https://twitter.com/intent/tweet?text=${tweetText}`;
+
+                const iframe = document.getElementById("algorithm-iframe");
+                if (iframe && iframe.contentWindow) {
+                    const targetOrigin = window.location.origin;
+                    console.log(`target origin: ${targetOrigin}`);
+                    iframe.contentWindow.postMessage({ type: "download-canvas" }, "*");
+                }
+            });
+        });
+
+        // Listen for canvas image from iframe
+        window.addEventListener("message", async (event) => {
+            const data = event.data;
+
+            if (data?.type === "canvas-image") {
+                if (isMobile) {
+                    const modal = document.getElementById("mobile-canvas-modal");
+                    const image = document.getElementById("mobile-canvas-copy");
+                    const backdrop = document.getElementById("info-backdrop-overlay");
+
+                    if (modal && image) {
+                        image.src = data.dataUrl;
+                        modal.style.display = "flex";
+                        mobileModalOpen = true;
+                        backdrop.style.display = "block";
+                    }
+                    return;
+                }
+
+                // Desktop copy + open tweet
+                try {
+                    const response = await fetch(data.dataUrl);
+                    const blob = await response.blob();
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ [blob.type]: blob })
+                    ]);
+                    window.alert("Pendulum image copied to clipboard!");
+                    if (pendingTweetURL) {
+                        window.open(pendingTweetURL, "_blank");
+                        pendingTweetURL = null;
+                    }
+                } catch (err) {
+                    console.error("Clipboard error:", err);
+                    window.alert("Could not copy image to clipboard.");
+                }
+            }
+
+            // Metadata update
+            if (data.systemRating || data.perfectionScore) {
+                if (data.systemRating) currentSystemRating = data.systemRating;
+                if (data.perfectionScore) currentPerfectionScore = data.perfectionScore;
+
+                for (const key in data) {
+                    const el = document.getElementById(key);
+                    if (el) {
+                        const label = el.textContent.split(":")[0];
+                        el.innerHTML = `${label}: <strong>${data[key]}</strong>`;
+                    }
+                }
+            }
+        });
+    });
+</script>
