@@ -11,6 +11,8 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 type Attribute = {
   trait_type: string;
@@ -43,6 +45,14 @@ type SortMode =
   | "perfection_asc"
   | "cycle_desc"
   | "cycle_asc";
+
+type ListingInfo = {
+  isListed: boolean;
+  rawPrice: string | null;
+  displayPrice: string | null;
+  currency: string | null;
+  fetchedAt: string;
+};
 
 const PAGE_SIZE = 60;
 const DESCRIPTION =
@@ -137,9 +147,12 @@ export function PendulumsGallery() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortMode>("token_asc");
   const [selected, setSelected] = useState<Map<string, Set<string>>>(new Map());
+  const [onlyListed, setOnlyListed] = useState(false);
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activeItem, setActiveItem] = useState<PendulumItem | null>(null);
+  const [listingByTokenId, setListingByTokenId] = useState<Record<number, ListingInfo>>({});
+  const [listingsLoading, setListingsLoading] = useState(true);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -216,10 +229,15 @@ export function PendulumsGallery() {
     return { traitTypes, typeValueCounts };
   }, [all]);
 
-  const filteredSorted = useMemo(() => {
+  const baseFilteredSorted = useMemo(() => {
     const filtered = all.filter((item) => matchesFilters(item, query, selected));
     return sortItems(filtered, sort);
   }, [all, query, selected, sort]);
+
+  const filteredSorted = useMemo(() => {
+    if (!onlyListed) return baseFilteredSorted;
+    return baseFilteredSorted.filter((item) => listingByTokenId[item.token_id]?.isListed);
+  }, [baseFilteredSorted, listingByTokenId, onlyListed]);
 
   const visibleItems = useMemo(
     () => filteredSorted.slice(0, visibleCount),
@@ -243,6 +261,46 @@ export function PendulumsGallery() {
     observer.observe(node);
     return () => observer.disconnect();
   }, [filteredSorted.length, visibleCount]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchListings() {
+      setListingsLoading(true);
+      try {
+        const response = await fetch(`/api/listings/status`, {
+          method: "GET",
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const payload = (await response.json()) as {
+          listings?: Record<string, ListingInfo>;
+        };
+        if (!payload.listings) return;
+
+        const next: Record<number, ListingInfo> = {};
+        for (const [tokenId, listing] of Object.entries(payload.listings ?? {})) {
+          next[Number(tokenId)] = listing;
+        }
+        setListingByTokenId(next);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      } finally {
+        setListingsLoading(false);
+      }
+    }
+
+    void fetchListings();
+    const intervalId = window.setInterval(fetchListings, 60_000);
+
+    return () => {
+      controller.abort();
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  const activeListing = activeItem ? listingByTokenId[activeItem.token_id] ?? null : null;
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -284,6 +342,7 @@ export function PendulumsGallery() {
     setSearch("");
     setSelected(new Map());
     setSort("token_asc");
+    setOnlyListed(false);
   }
 
   function applySingleAttributeFilter(trait: string, value: string) {
@@ -449,9 +508,25 @@ export function PendulumsGallery() {
 
           {!loading && !error ? (
             <>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Showing {filteredSorted.length} of {all.length}.
-              </p>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Showing {filteredSorted.length} of {all.length}.
+                </p>
+                <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={onlyListed}
+                    onCheckedChange={(checked) => {
+                      setVisibleCount(PAGE_SIZE);
+                      setOnlyListed(checked === true);
+                    }}
+                    aria-label="Only show listed pendulums"
+                  />
+                  <span>Only show Listed</span>
+                </label>
+              </div>
+              {onlyListed && listingsLoading ? (
+                <p className="mb-4 text-xs text-muted-foreground">Checking listings...</p>
+              ) : null}
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
                 {visibleItems.map((item) => (
                   <button
@@ -469,7 +544,18 @@ export function PendulumsGallery() {
                       className="block aspect-square w-full bg-background object-cover"
                     />
                     <div className="grid gap-1 p-3">
-                      <p className="text-sm">{item.name}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm">{item.name}</p>
+                        {listingByTokenId[item.token_id]?.isListed ? (
+                          <Badge
+                            aria-label="Active OpenSea listing"
+                            title="Active OpenSea listing"
+                            className="border-green-700 bg-green-100 text-green-900"
+                          >
+                            Listed
+                          </Badge>
+                        ) : null}
+                      </div>
                       {sort.startsWith("perfection_") ? (
                         <p className="text-xs text-muted-foreground">
                           Perfection Score: {item.perfection_score ?? "n/a"}
@@ -490,7 +576,9 @@ export function PendulumsGallery() {
       <Dialog
         open={Boolean(activeItem)}
         onOpenChange={(open) => {
-          if (!open) setActiveItem(null);
+          if (!open) {
+            setActiveItem(null);
+          }
         }}
       >
         <DialogContent
@@ -537,6 +625,7 @@ export function PendulumsGallery() {
                     className="inline-flex border border-border bg-background px-3 py-2 text-sm"
                   >
                     View on OpenSea
+                    {activeListing?.isListed && activeListing.displayPrice ? ` · ${activeListing.displayPrice}` : null}
                   </a>
                   <p className="text-sm leading-7 text-muted-foreground">{DESCRIPTION}</p>
                 </div>

@@ -2,7 +2,8 @@
 
 Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
 
-This file is for the next Codex session to quickly resume work.
+This file is a rolling handoff between Codex sessions so each new session can quickly understand recent work and continue smoothly.
+It is a project context summary, not a user request by itself.
 
 ## Current state
 
@@ -29,6 +30,13 @@ This file is for the next Codex session to quickly resume work.
   - 512 metadata loaded from `public/data/pendulums_1-512.json`.
   - Search, sort, trait filters, applied filter chips, infinite/lazy paging.
   - Clicking card opens item details modal.
+  - OpenSea listing integration:
+    - Green status dot on cards when token has an active listing.
+    - Modal OpenSea button now shows live list price when listed.
+    - Uses internal API routes (server-side key usage):
+      - `/api/listings/status?tokenIds=...`
+      - `/api/listings/[tokenId]`
+    - Shared OpenSea helper/caching in `src/lib/opensea.ts`.
   - Filter controls now use shadcn `Drawer`:
     - Mobile: bottom drawer
     - Desktop: right-side drawer
@@ -51,6 +59,9 @@ This file is for the next Codex session to quickly resume work.
 - Gallery:
   - `src/app/pendulums/gallery/page.tsx`
   - `src/components/pendulums-gallery.tsx`
+  - `src/app/api/listings/status/route.ts`
+  - `src/app/api/listings/[tokenId]/route.ts`
+  - `src/lib/opensea.ts`
 
 - shadcn ui:
   - `src/components/ui/dialog.tsx`
@@ -87,6 +98,10 @@ This file is for the next Codex session to quickly resume work.
 
 1. Run app and verify:
    - Gallery card modal animation iframe reliability (no p5 width=0 errors).
+   - OpenSea dots reflect listing status and modal price text renders correctly.
    - Filters drawer UX on desktop and mobile.
    - System metadata fields all populate each run.
-2. If desired, convert gallery images to `next/image` with proper remote patterns in `next.config.ts`.
+2. Ensure env is present for listing endpoints:
+   - `OPENSEA_API_KEY` (required)
+   - `OPENSEA_COLLECTION_SLUG` (optional fallback if contract lookup cannot resolve slug)
+3. If desired, convert gallery images to `next/image` with proper remote patterns in `next.config.ts`.
