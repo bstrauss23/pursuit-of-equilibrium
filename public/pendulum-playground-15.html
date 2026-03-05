@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pursuit of Code</title>
+    <script>
+        (function () {
+            try {
+                if (window.matchMedia('(max-width: 768px)').matches) {
+                    const style = document.createElement('style');
+                    style.textContent = '#canvas-container{padding:1rem !important;}';
+                    document.head.appendChild(style);
+                }
+            } catch (e) { }
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
+
+        :root {
+            --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --page-bg: transparent;
+            --panel-bg: #fffcf7;
+            --canvas-bg: #f3efe6;
+            --ink: #1f1d1a;
+            --ink-muted: #6c665d;
+            --border: #2f2c28;
+            --border-soft: rgba(47, 44, 40, 0.3);
+            --accent: #c7b695;
+            --shadow: 0 2px 5px #0003;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--page-bg);
+            color: var(--ink);
+            display: flex;
+            font-family: var(--font-mono);
+        }
+
+        #frame {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            flex: 1;
+            gap: 2rem;
+            height: 100%;
+        }
+
+        #control-panel {
+            width: 300px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid var(--border);
+            border-radius: 0;
+            background: var(--panel-bg);
+            box-shadow: var(--shadow);
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-family: var(--font-mono);
+            font-size: 0.825rem;
+            letter-spacing: 0.02em;
+            color: var(--ink);
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-option label {
+            font-size: 0.78rem;
+            color: var(--ink-muted);
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .slider-container input[type="range"] {
+            width: 100%;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100vh;
+            object-fit: contain;
+            width: auto;
+            height: auto;
+        }
+
+        #perfection-score {
+            position: absolute;
+            font-size: 0.95rem;
+            font-family: var(--font-mono);
+            color: var(--ink-muted);
+            align-self: baseline;
+            display: none;
+        }
+
+        .button {
+            position: absolute;
+            background: var(--panel-bg);
+            color: var(--ink);
+            border: 1px solid var(--border);
+            border-radius: 0;
+            font-size: 0.82rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+        }
+
+        .button:hover {
+            background: #e5e0d6;
+            color: var(--ink);
+            border: 1px solid var(--border);
+        }
+
+        #button-container {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .generate-random-wrap {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            width: 100%;
+        }
+
+        #generate-button,
+        #random-button {
+            position: relative;
+            width: 50%;
+            height: auto;
+            padding: 10px;
+        }
+
+        #animate-button {
+            position: relative;
+            width: 100%;
+            height: auto;
+            padding: 6px;
+        }
+
+        .phase-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+
+        .phase-group {
+            flex: 1;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button:disabled:hover {
+            background: var(--panel-bg);
+            color: var(--ink);
+            border: 1px solid var(--border);
+        }
+
+        .mode-line-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            margin-bottom: 5px;
+        }
+
+        .mode-line-group {
+            flex: 1;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .toggle-label {
+            font-family: var(--font-mono);
+            font-size: 0.825rem;
+            color: var(--ink);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #d9d3c8;
+            transition: .4s;
+            border-radius: 0;
+            border: 1px solid var(--border-soft);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--panel-bg);
+            transition: .2s;
+            border-radius: 0;
+            border: 1px solid var(--border-soft);
+        }
+
+        input:checked+.toggle-slider {
+            background-color: var(--accent);
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translate(20px, -50%);
+        }
+
+        #canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+            background: var(--canvas-bg);
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+            height: 100%;
+            padding: 2rem 0;
+        }
+
+        #canvas-border {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-container label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .value-display {
+            min-width: 65px;
+            text-align: right;
+            color: var(--ink-muted);
+        }
+
+        /* Helper for 4-grid layout for colors */
+        .color-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+
+        /* Footer Link Styles */
+        .footer-link {
+            margin-top: 0px;
+            margin-bottom: 5px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--ink-muted);
+            text-align: center;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            line-height: 1.4;
+        }
+
+        .footer-link:hover {
+            color: var(--ink);
+            text-decoration: underline;
+        }
+
+        input[type="range"],
+        input[type="radio"] {
+            accent-color: var(--ink);
+        }
+
+        input[type="range"] {
+            height: 2px;
+            background: var(--border-soft);
+            border-radius: 0;
+        }
+
+        @media (max-width: 768px) {
+            #frame {
+                position: relative;
+                overflow-x: hidden;
+                padding: 0;
+                gap: 0;
+            }
+
+            #control-panel {
+                position: fixed;
+                top: 50%;
+                left: 0;
+                transform: translate(-100%, -50%);
+                max-height: 90vh;
+                height: auto;
+                width: 300px;
+                transition: transform 0.3s ease-in-out;
+                z-index: 1000;
+                background: var(--panel-bg);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                padding: 20px;
+                padding-top: max(env(safe-area-inset-top), 20px);
+                padding-bottom: max(env(safe-area-inset-bottom), 20px);
+                gap: 8px;
+            }
+
+            #control-panel.open {
+                transform: translate(0, -50%);
+            }
+
+            #toggle-controls {
+                position: fixed;
+                left: 20px;
+                top: 20px;
+                z-index: 999;
+                padding: 10px;
+                background: var(--panel-bg);
+                border: 1px solid var(--border);
+                border-radius: 0;
+                cursor: pointer;
+            }
+
+            #canvas-container {
+                width: 100%;
+                padding: 1rem;
+                border-radius: 0;
+            }
+
+            .control-group {
+                gap: 6px;
+            }
+
+            .radio-group {
+                gap: 3px;
+            }
+
+            .phase-container {
+                gap: 12px;
+            }
+
+            .mode-line-container {
+                gap: 12px;
+                margin-bottom: 6px;
+            }
+
+            .toggle-container {
+                margin-bottom: 6px;
+            }
+
+            #button-container {
+                gap: 6px;
+            }
+
+            .generate-random-wrap {
+                gap: 6px;
+            }
+
+            @media (max-height: 600px) {
+                #control-panel {
+                    max-height: 85vh;
+                }
+            }
+        }
+
+        #toggle-controls {
+            display: none;
+            /* Hide by default */
+        }
+
+        @media (max-width: 768px) {
+            #toggle-controls {
+                display: block;
+                /* Show only on mobile */
+                position: fixed;
+                left: 20px;
+                top: 20px;
+                z-index: 999;
+                padding: 10px;
+                background: var(--panel-bg);
+                border: 1px solid var(--border);
+                border-radius: 0;
+                cursor: pointer;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button id="toggle-controls" class="button">Controls</button>
+    <div id="frame">
+        <div id="control-panel">
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="period-x">Period X <span id="period-x-value" class="value-display">1 s</span></label>
+                    <input type="range" id="period-x" min="1" max="10" step="1" value="1">
+                </div>
+                <div class="slider-container">
+                    <label for="period-offset-x">Period Offset X <span id="period-offset-x-value"
+                            class="value-display">0.0000 s</span></label>
+                    <input type="range" id="period-offset-x" min="0" max="0.02" step="0.0001" value="0">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="period-y">Period Y <span id="period-y-value" class="value-display">1 s</span></label>
+                    <input type="range" id="period-y" min="1" max="10" step="1" value="1">
+                </div>
+                <div class="slider-container">
+                    <label for="period-offset-y">Period Offset Y <span id="period-offset-y-value"
+                            class="value-display">0.0000 s</span></label>
+                    <input type="range" id="period-offset-y" min="0" max="0.02" step="0.0001" value="0">
+                </div>
+            </div>
+
+            <div class="phase-container">
+                <div class="control-group phase-group">
+                    <label>Phase Offset X</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="phase-x-0" name="phase-x" value="0" checked>
+                            <label for="phase-x-0">0</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-x-pi8" name="phase-x" value="π/8">
+                            <label for="phase-x-pi8">π/8</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-x-pi4" name="phase-x" value="π/4">
+                            <label for="phase-x-pi4">π/4</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-x-pi3" name="phase-x" value="π/3">
+                            <label for="phase-x-pi3">π/3</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-x-pi2" name="phase-x" value="π/2">
+                            <label for="phase-x-pi2">π/2</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-x-pi" name="phase-x" value="π">
+                            <label for="phase-x-pi">π</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group phase-group">
+                    <label>Phase Offset Y</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="phase-y-0" name="phase-y" value="0" checked>
+                            <label for="phase-y-0">0</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-y-pi8" name="phase-y" value="π/8">
+                            <label for="phase-y-pi8">π/8</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-y-pi4" name="phase-y" value="π/4">
+                            <label for="phase-y-pi4">π/4</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-y-pi3" name="phase-y" value="π/3">
+                            <label for="phase-y-pi3">π/3</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-y-pi2" name="phase-y" value="π/2">
+                            <label for="phase-y-pi2">π/2</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phase-y-pi" name="phase-y" value="π">
+                            <label for="phase-y-pi">π</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mode-line-container">
+                <div class="control-group mode-line-group">
+                    <label>Line Type</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="line-solid" name="line-type" value="solid" checked>
+                            <label for="line-solid">Solid</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="line-dashed" name="line-type" value="dashed">
+                            <label for="line-dashed">Dashed</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group mode-line-group">
+                    <label>Mode</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="mode-light" name="mode" value="light" checked>
+                            <label for="mode-light">Light</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="mode-dark" name="mode" value="dark">
+                            <label for="mode-dark">Dark</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Color Theme</label>
+                <div class="radio-group color-grid">
+                    <div class="radio-option">
+                        <input type="radio" id="color-none" name="color-theme" value="None" checked>
+                        <label for="color-none">None</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="color-grove" name="color-theme" value="Deep Grove">
+                        <label for="color-grove">Deep Grove</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="color-slate" name="color-theme" value="Slate Horizon">
+                        <label for="color-slate">Slate Horizon</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="color-iron" name="color-theme" value="Iron Ember">
+                        <label for="color-iron">Iron Ember</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="amplitude-x">Amplitude X <span id="amplitude-x-value"
+                            class="value-display">1</span></label>
+                    <input type="range" id="amplitude-x" min="1" max="10" step="1" value="1">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="amplitude-y">Amplitude Y <span id="amplitude-y-value"
+                            class="value-display">1</span></label>
+                    <input type="range" id="amplitude-y" min="1" max="10" step="1" value="1">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="damping-x">Damping X <span id="damping-x-value"
+                            class="value-display">Medium</span></label>
+                    <input type="range" id="damping-x" min="0" max="100" step="1" value="50">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="damping-y">Damping Y <span id="damping-y-value"
+                            class="value-display">Medium</span></label>
+                    <input type="range" id="damping-y" min="0" max="100" step="1" value="50">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="cycle-count">Cycle Count <span id="cycle-count-value"
+                            class="value-display">250</span></label>
+                    <input type="range" id="cycle-count" min="1" max="500" step="1" value="250">
+                </div>
+            </div>
+
+            <div class="toggle-container">
+                <span class="toggle-label">Auto-generate</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="auto-generate-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div id="button-container">
+                <div class="generate-random-wrap">
+                    <button class="button" id="generate-button">>> generate</button>
+                    <button class="button" id="random-button">>> randomize</button>
+                </div>
+                <button class="button" id="animate-button" disabled>>> animate</button>
+            </div>
+
+        </div>
+        <div id="canvas-container">
+            <div id="canvas-border">
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
+    <script>
+
+        // ======================
+        // VARIABLES DECLARATION
+        // ======================
+        let canvasSize, origin, x, y; // Canvas initialization variables 
+        let trace = []; // Array of coordinates for plotting out pendulum swing path
+        let traceAnimation = [];
+        let amplitudeX, amplitudeXRaw, amplitudeY, amplitudeYRaw, dampingX, dampX, dampingY, dampY, periodX, periodY, phaseOffsetX, phaseOffsetY, freqX, freqY, periodRatio; // Pendulum equation parameters
+        let aspectRatio; // aspect ratio of x and y amplitudes
+        let periodOffset = 0; // Offset applied to periods (x or y) that simulate imperfections in the system
+        let totalPoints; // Total points used in calculating trace[] path
+        let fps = 60; // Frame rate 
+        let currentPoint = 0; // Starting point index for swing path
+        let animateDrawing = false; // State variable for animated versus fully drawn states
+        let startTime = 0; // Initialize start time
+        let runtime; // Total time a drawing takes to complete
+        let periodRatios; // Array of possible period rations (periodX / periodY)
+        let periodRatiosObj; // Object to map period ratios to their respective strings
+        let clickState = 1; // Initialize what state the piece is in (animated verses static)
+        let strokeSize; // Line width in pixels
+        let pixelDensityValue; // Pixel density value used for caluclating and creating noise layers (paperTexture and pencilTexture)
+        let mode; // Mode of the piece (Dark or Light)
+        let colorTheme; // The selected color theme (None, Deep Grove, Slate Horizon, Iron Ember)
+        let highResCanvasSize; // Canvas size when downloading the high res version of the artwork
+        let filename; // File name for downloaded high res file
+        let prevPixelDensity; // Variable to store default pixel density before high res download 
+        let prevStrokeSize; // Variable to store stroke size before high res download 
+        let ratioIndex; // Variable for random choice of possible period ratios
+        let periodRatioString; // Allows lookup of period ratio string from period ratio in the periodRatiosObj
+        let phaseOffsets; // Array containing possible phase offsets 
+        let phaseOffsetObj; // Object to map phase offsets to their respective strings
+        let phaseOffsetStringX, phaseOffsetStringY; // Allows lookup of phase offset strings using phase offset in the phaseOffsetObj
+        let perfectionScore; // Calculated metric, ranging from 5 - 100 in steps of 5, that represents how "perfect" a pendulum output is
+        let systemRating; // Category for each pendulum output, driven by the perfection score
+        let bonusPoints; // Bonus points added to calculated perfection score for certain period ratios with lower than 7 lcm's
+        let lcm, lcms; // Least common multiplier, used to determine how much in common the x and y period have
+        let adjustedScore; // The calculated score after applying all reduction mechanisms
+        let dampingPercentileX, dampingPercentileY; // Percentile of the damping ratios (out of a perfect damping ratio of 1)
+        let scaledValue; // Scaled average of the two damping percentiles 
+        let lineType, lineTypes; // beginShape() type that results in either a solid line or dashed line
+        let particles = []; // Array to hold the particles
+        let particleSize;
+        let traceForward = true;
+        let seedValue;
+        let debounceTimer;
+        let resizeDebounceTimer;
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        // Setup function with random determination of parameters
+        function init() {
+
+            // ======================
+            // DEFINE CONST
+            // ======================   
+
+            // seedValue is assigned on each generate click
+
+            // Canvas setup //
+            const container = document.getElementById('canvas-container');
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                container.style.padding = '1rem';
+            }
+            const containerStyle = getComputedStyle(container);
+            const paddingX = parseFloat(containerStyle.paddingLeft) + parseFloat(containerStyle.paddingRight);
+            const paddingY = parseFloat(containerStyle.paddingTop) + parseFloat(containerStyle.paddingBottom);
+            const availableWidth = container.clientWidth - paddingX;
+            const availableHeight = container.clientHeight - paddingY;
+            canvasSize = Math.max(100, min(availableWidth, availableHeight));
+            let canvas = createCanvas(canvasSize, canvasSize);
+            canvas.parent('canvas-border');
+            frameRate(fps);
+            origin = createVector(width / 2, height / 2);
+
+            // Other misc constants //
+            pixelDensityValue = floor(2000 / canvasSize);
+            ellipseSize = canvasSize / 200;
+            if (parseFloat((canvasSize / 1200).toFixed(1)) < 0.75) {
+                strokeSize = 0.75;
+            } else {
+                strokeSize = parseFloat((canvasSize / 1200).toFixed(1));
+            }
+
+            // Add this line to make the border visible after canvas is created
+            document.getElementById('canvas-container').classList.add('visible');
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+            // ==============================
+            // DEFINE RANDOM SELECTION ARRAYS
+            // ==============================
+
+
+            // Possible period ratios //
+            periodRatiosObj = { "1:1": 1 / 1, "1:2": 1 / 2, "1:3": 1 / 3, "1:4": 1 / 4, "1:5": 1 / 5, "1:6": 1 / 6, "1:7": 1 / 7, "1:8": 1 / 8, "1:9": 1 / 9, "1:10": 1 / 10, "2:3": 2 / 3, "2:5": 2 / 5, "2:7": 2 / 7, "2:9": 2 / 9, "3:4": 3 / 4, "3:5": 3 / 5, "3:6": 3 / 6, "3:7": 3 / 7, "3:8": 3 / 8, "4:5": 4 / 5, "4:7": 4 / 7, "4:9": 4 / 9, "5:6": 5 / 6, "5:7": 5 / 7, "5:8": 5 / 8, "5:9": 5 / 9, "6:7": 6 / 7, "7:8": 7 / 8, "7:9": 7 / 9, "8:9": 8 / 9, "9:10": 9 / 10 };
+
+            // Least common multiple array //
+            lcms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 6, 10, 14, 18, 12, 15, 21, 24, 20, 28, 36, 30, 35, 40, 45, 42, 56, 63, 72, 90];
+
+            // Possible phase offsets //
+            phaseOffsets = [0, PI / 8, PI / 4, PI / 3, PI / 2, PI];
+            phaseOffsetObj = { "0": 0, "π/8": PI / 8, "π/4": PI / 4, "π/3": PI / 3, "π/2": PI / 2, "π": PI };
+
+
+            // =====================
+            // COLOR & THEME DETERMINATION
+            // =====================
+
+            // We use the 'mode' variable (passed from button listener) and 'colorTheme' variable
+            if (mode === "dark") {
+                // Background varies by theme, Stroke is light
+                strokeColorRed = 255;
+                strokeColorGreen = 250;
+                strokeColorBlue = 240;
+                strokeAlpha = 245;
+                exposureThreshold = 0.6;
+
+                if (lineType === POINTS) {
+                    strokeSize = 1.5;
+                }
+
+                if (colorTheme === "None") {
+                    colorRed = 22;
+                    colorGreen = 22;
+                    colorBlue = 22;
+                } else if (colorTheme === "Deep Grove") {
+                    colorRed = 28 * 0.75;
+                    colorGreen = 48 * 0.75;
+                    colorBlue = 35 * 0.75;
+                } else if (colorTheme === "Slate Horizon") {
+                    colorRed = 27 * 0.75;
+                    colorGreen = 46 * 0.75;
+                    colorBlue = 74 * 0.75;
+                } else if (colorTheme === "Iron Ember") {
+                    colorRed = 76 * 0.75;
+                    colorGreen = 30 * 0.75;
+                    colorBlue = 30 * 0.75;
+                }
+            } else {
+                // Background is light, Stroke varies by theme
+                colorRed = 255;
+                colorGreen = 250;
+                colorBlue = 240;
+                strokeAlpha = 240;
+                exposureThreshold = 0.15;
+
+                if (lineType === POINTS) {
+                    strokeSize = 2;
+                }
+
+                if (colorTheme === "None") {
+                    strokeColorRed = 48;
+                    strokeColorGreen = 46;
+                    strokeColorBlue = 40;
+                } else if (colorTheme === "Deep Grove") {
+                    strokeColorRed = 28;
+                    strokeColorGreen = 48;
+                    strokeColorBlue = 35;
+                } else if (colorTheme === "Slate Horizon") {
+                    strokeColorRed = 27;
+                    strokeColorGreen = 46;
+                    strokeColorBlue = 74;
+                } else if (colorTheme === "Iron Ember") {
+                    strokeColorRed = 76;
+                    strokeColorGreen = 30;
+                    strokeColorBlue = 30;
+                }
+            }
+
+            // Determine x and y amplitudes //
+            amplitudeX = map(amplitudeXRaw, 1, 10, canvasSize / 10, canvasSize / 2.25);
+            amplitudeY = map(amplitudeYRaw, 1, 10, canvasSize / 10, canvasSize / 2.25);
+            aspectRatio = amplitudeX / amplitudeY;
+            if (aspectRatio > 1) {
+                aspectRatio = 1 / aspectRatio;
+            }
+
+            // Determine period ratio //
+            periodRatios = [1 / 1, 1 / 2, 1 / 3, 1 / 4, 1 / 5, 1 / 6, 1 / 7, 1 / 8, 1 / 9, 1 / 10, 2 / 3, 2 / 5, 2 / 7, 2 / 9, 3 / 4, 3 / 5, 3 / 7, 3 / 8, 4 / 5, 4 / 7, 4 / 9, 5 / 6, 5 / 7, 5 / 8, 5 / 9, 6 / 7, 7 / 8, 7 / 9, 8 / 9, 9 / 10];
+            ratioIndex = periodRatios.findIndex(ratio => Math.abs(ratio - periodRatio) < 1e-10); // Find index with small epsilon for floating point comparison
+            periodRatioString = findPeriodRatioString(periodRatiosObj, periodRatio);
+            lcm = lcms[ratioIndex];
+
+            // Determine x and y periods //
+            // let minPeriod = 1.5;
+            // if (periodRatio <= 1) {
+            //     periodX = minPeriod;
+            //     periodY = (1 / periodRatio) * minPeriod;
+            // } else {
+            //     periodX = periodRatio * minPeriod;
+            //     periodY = minPeriod;
+            // }
+
+            // Determine damping coefficients
+            minDampingX = roundToEightDecimalPlaces(dampingCoefficient(periodX));
+            minDampingY = roundToEightDecimalPlaces(dampingCoefficient(periodY));
+            dampingX = map(dampX, 0, 100, 1, 0.9998);
+            dampingY = map(dampY, 0, 100, 1, 0.9998);
+
+            // Calculate x and yfrequencies //
+            freqX = 1 / periodX;
+            freqY = 1 / periodY;
+            console.log(`freqX: ${freqX}`);
+
+            // Damping percentiles (out of a perfect value of 1) //    
+            dampingPercentileX = (dampingX - minDampingX) / (1 - minDampingX);
+            dampingPercentileY = (dampingY - minDampingY) / (1 - minDampingY);
+            scaledValue = ((dampingPercentileX + dampingPercentileY) / 2) * 100;
+
+            // Determine cycle count //
+            console.log(`cycleCount: ${cycleCount}`);
+
+            // Calculate the animation runtime (exposure time) //
+            runtime = (cycleCount * min(periodX, periodY)).toFixed(0);
+
+            // Total points to calculate //
+            totalPoints = runtime * fps;
+
+            // ========== Calculate the Perfection Score ========== //
+
+            // Score reduction factors //
+            let lcmReduction = (lcm / 3) * (1 - exp(-(2.1 - (dampingPercentileX + dampingPercentileY))));
+            let aspectRatioReduction = 13 * pow(1 - aspectRatio, 4);
+            let scaleReduction = 20 * pow(1 - ((amplitudeX + amplitudeY) / canvasSize), 4);
+            let periodOffsetReduction = 5 * pow(1 * (periodOffset / 0.01), 3);
+            let cycleCountReduction = 10 * pow(1 - (cycleCount / 500), 10);
+            // console.log(`LCM Reduction: ${lcmReduction}`);
+            // console.log(`Aspect Ratio Reduction: ${aspectRatioReduction}`);
+            // console.log(`Scale Reduction: ${scaleReduction}`);
+            // console.log(`Period Offset Reduction: ${periodOffsetReduction}`);
+            // console.log(`Cycle Count Reduction: ${cycleCountReduction}`);
+
+            // Bonus Points for period ratios with LCM < 7 //
+            if (lcm <= 6) {
+                bonusPoints = (100 - scaledValue) * ((7 - (lcm + (1 / lcm))) / 10);
+            } else {
+                bonusPoints = 0;
+            }
+
+            // Calculate adjusted score //
+            adjustedScore = scaledValue - lcmReduction - aspectRatioReduction - scaleReduction - periodOffsetReduction - cycleCountReduction + bonusPoints;
+
+            // Convert to Perfection Score, binned by 5's, unless a Godlike System (98 - 100);
+            perfectionScore = floor(adjustedScore / 5) * 5;
+            if (perfectionScore < 5) {
+                perfectionScore = 5;
+            }
+            // For testing only //
+            if (perfectionScore >= 95) {
+                systemRating = "Perfect";
+                // alert("Perfect System");
+            } else if (perfectionScore >= 90) {
+                systemRating = "Superior";
+                // alert("Superior System");
+            } else if (perfectionScore >= 85) {
+                systemRating = "Advanced";
+                // alert("Advanced System");
+            } else if (perfectionScore >= 80) {
+                systemRating = "Notable";
+                // alert("Notable System");
+            } else if (perfectionScore >= 70) {
+                systemRating = "Proficient";
+                // alert("Proficient System");
+            } else if (perfectionScore >= 60) {
+                systemRating = "Adequate";
+                // alert("Adequate System");
+            } else {
+                systemRating = "Basic";
+                // alert("Basic System");
+            }
+
+            // ========== Create noise layers ========== //        
+            paperTexture = createGraphics(width, height);
+            paperTexture.pixelDensity(pixelDensityValue);
+            pencilTexture = createGraphics(width, height);
+            pencilTexture.pixelDensity(pixelDensityValue);
+            generatePaperTexture();
+            generatePencilTexture();
+
+            //// Calculate trace array with all x and y coordinates
+            calculateTrace();
+            calculateTraceAnimation();
+            if (!animateDrawing) {
+                drawTrace();
+            }
+
+            // Enable the animate button after initialization is complete
+            document.getElementById("animate-button").disabled = false;
+
+            printParameters()
+        }
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////   
+
+
+        // =====================
+        // BEGIN FUNCTIONS
+        // =====================
+
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to round to six decimal places
+        function roundToEightDecimalPlaces(num) {
+            return Math.round(num * 1e8) / 1e8;
+        };
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to calculate minimum damping coefficient, calculated as a function of the period and linearly interpolated
+        function dampingCoefficient(p) {
+            // console.log(`p value: ${p}`);
+            // Define the known period lengths and their corresponding damping coefficients, following the power of 2's
+            let periods = [1, 2, 4, 8, 16];
+            let coefficients = [0.99925, 0.999625, 0.9998125, 0.99990625, 0.999953125];
+
+            // If p is exactly one of the known periods, return the corresponding coefficient directly
+            for (let i = 0; i < periods.length; i++) {
+                if (p === periods[i]) {
+                    return coefficients[i];
+                }
+            }
+
+            // For p values between known periods, interpolate linearly between the nearest points
+            for (let i = 0; i < periods.length - 1; i++) {
+                if (p > periods[i] && p < periods[i + 1]) {
+                    // Linear interpolation formula
+                    let y0 = coefficients[i];
+                    let y1 = coefficients[i + 1];
+                    let x0 = periods[i];
+                    let x1 = periods[i + 1];
+                    return y0 + (y1 - y0) * ((p - x0) / (x1 - x0));
+                }
+            }
+        };
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to print out various parameters in the console
+        function printParameters() {
+            console.log(`Mode: ${mode}`);
+            console.log(`Theme: ${colorTheme}`);
+            console.log(`System: ${systemRating}`);
+            console.log(`Perfection score: ${perfectionScore}`);
+            // document.getElementById("perfection-score").innerHTML = `System Rating: <b>${systemRating}</b>`;
+
+            //For testing
+            console.log(`Adjusted Score: ${adjustedScore}`);
+            console.log(`Bonus points: ${bonusPoints}`);
+            console.log(`lcm: ${lcm}`);
+            console.log(`scaledValue: ${scaledValue}`)
+            console.log(`Percentile X: ${dampingPercentileX}`);
+            console.log(`Percentile Y: ${dampingPercentileY}`);
+            console.log(`Period ratio: ${periodRatioString}`);
+            console.log(`Run time: ${runtime}s`);
+            console.log(`X-period: ${periodX}s`);
+            console.log(`Y-period: ${periodY}s`);
+            console.log(`Period Offset: ${periodOffset}s`);
+            console.log(`X-amplitude: ${amplitudeX.toFixed(1)}`);
+            console.log(`Y-amplitude: ${amplitudeY.toFixed(1)}`);
+            console.log(`X-damping: ${dampingX}`);
+            console.log(`Y-damping: ${dampingY}`);
+            console.log(`X-phase offset: ${phaseOffsetStringX}`);
+            console.log(`Y-phase offset: ${phaseOffsetStringY}`);
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Function to convert the period ratio to a string by earching the periodRatiosObj
+        function findPeriodRatioString(periodRatiosObj, searchValue) {
+            let epsilon = 1e-10; // Small tolerance for floating-point comparison
+            for (const [key, value] of Object.entries(periodRatiosObj)) {
+                if (abs(value - searchValue) < epsilon) {
+                    return key; // Return the key if the values are "close enough"
+                }
+            }
+            return null; // Return null if no matching key is found
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Convert the phase offsets to a string
+        function findPhaseOffsetString(phaseOffsetObj, searchValue) {
+            let epsilon = 1e-10; // Small tolerance for floating-point comparison
+            for (const [key, value] of Object.entries(phaseOffsetObj)) {
+                if (abs(value - searchValue) < epsilon) {
+                    return key; // Return the key if the values are "close enough"
+                }
+            }
+            return null; // Return null if no matching key is found
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Generate the noise graphics layer to give the canvas some texture
+        function generatePaperTexture() {
+            paperTexture.loadPixels();
+            let d = paperTexture.pixelDensity();
+            for (let y = 0; y < paperTexture.height * d; y++) {
+                for (let x = 0; x < paperTexture.width * d; x++) {
+                    let index = (x + y * paperTexture.width * d) * 4;
+                    exposure = random(1);
+
+                    // Determine the alpha value based on brightness and probability
+                    let alpha;
+                    if (mode === "dark") { // Check using normalized mode variable
+                        if (exposure < exposureThreshold) {
+                            alpha = 0;
+                        } else {
+                            if (random(1) < 0.1) {
+                                alpha = random(0, 150);
+                            } else {
+                                alpha = random(0, 50);
+                            }
+                        }
+                    } else {
+                        if (exposure > exposureThreshold) {
+                            alpha = 0;
+                        } else {
+                            if (random(1) < 0.15) {
+                                alpha = random(0, 200);
+                            } else {
+                                alpha = random(0, 75);
+                            }
+                        }
+                    }
+
+                    // Assign the grayscale value and alpha to the paperTexture's pixels
+                    paperTexture.pixels[index + 0] = 255 * exposure; // Red
+                    paperTexture.pixels[index + 1] = 250 * exposure; // Green
+                    paperTexture.pixels[index + 2] = 240 * exposure; // Blue
+                    paperTexture.pixels[index + 3] = alpha; // Correctly set Alpha (transparency level)
+                }
+            }
+            paperTexture.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Genereate an inverse noise graphics layer that gives the lines trokes a graphite pencil appearance
+        function generatePencilTexture() {
+            pencilTexture.loadPixels();
+            let d = pencilTexture.pixelDensity();
+            for (let y = 0; y < pencilTexture.height * d; y++) {
+                for (let x = 0; x < pencilTexture.width * d; x++) {
+                    let index = (x + y * pencilTexture.width * d) * 4; // Correct index calculation
+
+                    // Determine the alpha value based on probability
+                    let alpha;
+                    if (random(1) < 0.50) {
+                        alpha = 0;
+                    } else {
+                        if (random(1) < 0.95) {
+                            alpha = random(0, 75);
+                        } else {
+                            alpha = random(75, 255);
+                        }
+                    }
+                    // Assign the grayscale value and alpha to the pencilTexture's pixels
+                    pencilTexture.pixels[index + 0] = colorRed; // Red
+                    pencilTexture.pixels[index + 1] = colorGreen; // Green
+                    pencilTexture.pixels[index + 2] = colorBlue; // Blue
+                    pencilTexture.pixels[index + 3] = alpha; // Correctly set Alpha (transparency level)
+                }
+            }
+            pencilTexture.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Functon to calculate a random number with a given increment
+        function randomIncrement(min, max, increment) {
+            // Calculate the number of increments between min and max period, T
+            let steps = floor((max - min) / increment);
+
+            // Generate a random step
+            let randomStep = floor(random() * (steps + 1));
+
+            // Calculate the actual value
+            let randomValue = min + randomStep * increment;
+
+            // Ensure the value is rounded to one decimal place to avoid floating-point arithmetic issues
+            return parseFloat(randomValue.toFixed(6));
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Calculate all of the (x, y) coordinates for the pendulum drawing and store them in the trace array
+        function calculateTraceAnimation() {
+            let t = 0;
+            let easePoints = 100;
+            let allPoints = totalPoints + easePoints;
+            let dtStep = (1 / fps) / easePoints;
+            let dt = dtStep;
+            let dampingAdjCoeff;
+
+            for (let i = 0; i < allPoints; i++) {
+                if (i != 0) {
+                    dampingAdjCoeff = t / ((1 / fps) * i);
+                } else {
+                    dampingAdjCoeff = 0;
+                }
+                let dampX = pow(dampingX, (i * dampingAdjCoeff));
+                let dampY = pow(dampingY, (i * dampingAdjCoeff));
+
+                let x = origin.x + amplitudeX * dampX * sin(TWO_PI * freqX * t + phaseOffsetX);
+                let y = origin.y + amplitudeY * dampY * sin(TWO_PI * freqY * t + phaseOffsetY);
+
+                traceAnimation.push(createVector(x, y));
+
+                if (i < easePoints) {
+                    dt = dt + dtStep;
+                } else if ((allPoints - i) <= easePoints) {
+                    dt = dt - dtStep;
+                } else {
+                    dt = 1 / fps;
+                }
+                t += dt;
+            }
+        }
+
+        function calculateTrace() {
+            let t = 0;
+            let dt = 1 / fps; // Change in time per point
+
+            for (let i = 0; i < totalPoints; i++) {
+                let dampX = pow(dampingX, i);
+                let dampY = pow(dampingY, i);
+
+                let x = origin.x + amplitudeX * dampX * sin(TWO_PI * freqX * t + phaseOffsetX);
+                let y = origin.y + amplitudeY * dampY * sin(TWO_PI * freqY * t + phaseOffsetY);
+
+                trace.push(createVector(x, y));
+
+                t += dt;
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Draw out the pendulum pattern
+        function drawTrace() {
+            background(colorRed, colorGreen, colorBlue);
+            noFill();
+            stroke(strokeColorRed, strokeColorGreen, strokeColorBlue, strokeAlpha);
+            strokeCap(PROJECT);
+            strokeWeight(strokeSize);
+
+            if (lineType === null) {
+                beginShape();
+            } else {
+                beginShape(lineType);
+            }
+
+            for (let v of trace) {
+                vertex(v.x, v.y);
+            }
+            endShape();
+
+            image(paperTexture, 0, 0);
+            image(pencilTexture, 0, 0);
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Draw the pendulum pattern with animation 
+        function draw() {
+            if (animateDrawing) {
+                background(colorRed, colorGreen, colorBlue);
+                noFill();
+                stroke(strokeColorRed, strokeColorGreen, strokeColorBlue, strokeAlpha);
+                strokeWeight(strokeSize);
+
+                if (lineType === null) {
+                    beginShape();
+                } else {
+                    beginShape(lineType);
+                }
+
+                // Draw the visible portion of the line based on the currentPoint
+                for (let i = 0; i <= currentPoint && i < traceAnimation.length; i++) {
+                    vertex(traceAnimation[i].x, traceAnimation[i].y);
+                }
+
+                endShape();
+
+                image(paperTexture, 0, 0);
+                image(pencilTexture, 0, 0);
+
+                // Check which animation state the piece should be in
+                if (clickState === 0) {
+                    fill(strokeColorRed, strokeColorGreen, strokeColorBlue, strokeAlpha);
+                    ellipse(traceAnimation[currentPoint].x, traceAnimation[currentPoint].y, ellipseSize, ellipseSize);
+                    if (traceForward) {
+                        currentPoint++;
+                        if (currentPoint >= traceAnimation.length - 1) {
+                            traceForward = false;
+                            currentPoint = traceAnimation.length - 1; // Ensure currentPoint stays within bounds
+                        }
+                    } else {
+                        currentPoint--;
+                        if (currentPoint < 0) {
+                            traceForward = true;
+                            currentPoint = 0; // Ensure currentPoint stays within bounds
+                        }
+                    }
+                } else {
+                    clickState = 1;
+                    animateDrawing = false;
+                    ellipseSize = canvasSize / 200;
+                }
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Detect if the canvas was clicked on mobile
+        // function touchEnded() {
+        //     clear();
+        //     if (clickState === 0) {
+        //         clickState = 1;
+        //         animateDrawing = false;
+        //         drawTrace();
+        //     } else if (clickState === 1) {
+        //         clickState = 0;
+        //         currentPoint = 0;
+        //         animateDrawing = true;
+        //         draw();
+        //     }
+        //     return false; // Prevent default behavior
+        // }
+
+        /////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////
+
+
+        // ========================
+        // HIGH RESOLUTION DOWNLOAD
+        // ========================        
+        // The below section is triggered when the user saves a high resolution version
+
+        // Generate the high res noise graphics layer for paper texture
+        function generatePaperTextureHighRes() {
+            paperTextureHighRes.loadPixels();
+            let d = paperTextureHighRes.pixelDensity();
+            for (let y = 0; y < paperTextureHighRes.height * d; y++) {
+                for (let x = 0; x < paperTextureHighRes.width * d; x++) {
+                    let index = (x + y * paperTextureHighRes.width * d) * 4; // Correct index calculation
+                    exposure = random(1);
+
+                    // Determine the alpha value based on brightness and probability
+                    let alpha;
+                    if (exposure > exposureThreshold) {
+                        alpha = 0;
+                    } else {
+                        if (random(1) < 0.15) {
+                            alpha = random(0, 200);
+                        } else {
+                            alpha = random(0, 100);
+                        }
+                    }
+
+                    // Assign the grayscale value and alpha to the paperTextureHighRes's pixels
+                    paperTextureHighRes.pixels[index + 0] = 255 * exposure; // Red
+                    paperTextureHighRes.pixels[index + 1] = 250 * exposure; // Green
+                    paperTextureHighRes.pixels[index + 2] = 240 * exposure; // Blue
+                    paperTextureHighRes.pixels[index + 3] = alpha; // Correctly set Alpha (transparency level)
+                }
+            }
+            paperTextureHighRes.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Generate the high res noise graphics layer for line texture
+        function generatePencilTextureHighRes() {
+            pencilTextureHighRes.loadPixels();
+            let d = pencilTextureHighRes.pixelDensity();
+            for (let y = 0; y < pencilTextureHighRes.height * d; y++) {
+                for (let x = 0; x < pencilTextureHighRes.width * d; x++) {
+                    let index = (x + y * pencilTextureHighRes.width * d) * 4; // Correct index calculation
+
+                    // Determine the alpha value based on probability
+                    let alpha;
+                    if (random(1) < 0.50) {
+                        alpha = 0;
+                    } else {
+                        if (random(1) < 0.94) {
+                            alpha = random(0, 75);
+                        } else {
+                            alpha = random(75, 255);
+                        }
+                    }
+                    // Assign the grayscale value and alpha to the pencilTextureHighRes's pixels
+                    pencilTextureHighRes.pixels[index + 0] = colorRed; // Red
+                    pencilTextureHighRes.pixels[index + 1] = colorGreen; // Green
+                    pencilTextureHighRes.pixels[index + 2] = colorBlue; // Blue
+                    pencilTextureHighRes.pixels[index + 3] = alpha; // Correctly set Alpha (transparency level)
+                }
+            }
+            pencilTextureHighRes.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Draw out the high res pendulum pattern
+        function drawHighRes(gfx) {
+            gfx.background(colorRed, colorGreen, colorBlue);
+            gfx.noFill();
+            gfx.stroke(strokeColorRed, strokeColorGreen, strokeColorBlue, strokeAlpha);
+            gfx.strokeWeight(strokeSize);
+
+            // Adjusted size parameters for high-res drawing
+            let scaleRatio = highResCanvasSize / canvasSize; // Calculate scale ratio
+
+            // Example drawing logic, scaled for high resolution
+            if (lineType === null) {
+                gfx.beginShape();
+            } else {
+                gfx.beginShape(lineType);
+            }
+
+            for (let v of trace) {
+                gfx.vertex(v.x * scaleRatio, v.y * scaleRatio);
+            }
+            gfx.endShape();
+
+            gfx.image(paperTextureHighRes, 0, 0);
+            gfx.image(pencilTextureHighRes, 0, 0);
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Download the high resolution output as a jpeg
+        function downloadHighResImage(highResCanvasSize, strokeSize, pixelDensityValue, filename) {
+            alert("You have triggered a high-resolution download of this piece.  \nSelect 'OK' to continue.  \n\n(Please keep this window open until download is complete)");
+            let highResCanvas = createGraphics(highResCanvasSize, highResCanvasSize);
+            paperTextureHighRes = createGraphics(highResCanvasSize, highResCanvasSize);
+            paperTextureHighRes.pixelDensity(pixelDensityValue);
+            pencilTextureHighRes = createGraphics(highResCanvasSize, highResCanvasSize);
+            pencilTextureHighRes.pixelDensity(pixelDensityValue);
+            generatePaperTextureHighRes();
+            generatePencilTextureHighRes();
+            drawHighRes(highResCanvas);
+
+            // Use toDataURL for saving
+            let dataURL = highResCanvas.elt.toDataURL('image/jpeg');
+            let link = document.createElement('a');
+            link.download = filename;
+            link.href = dataURL;
+            link.click();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Detect if the "s" key was pressed by the user, triggering the high-res redraw and download process
+        // function keyPressed() {
+        //     let isSKey = key === "s" || key === "S";
+        //     if (isSKey) {
+        //         console.log("Save Trigged");
+        //         prevPixelDensity = pixelDensityValue;
+        //         prevStrokeSize = strokeSize;
+        //         highResCanvasSize = 2500;
+        //         strokeSize = 1.75;
+        //         pixelDensityValue = 1.25;
+        //         filename = `${systemRating}-${seedValue}.jpeg`;
+        //         downloadHighResImage(highResCanvasSize, strokeSize, pixelDensityValue, filename);
+        //         pixelDensityValue = prevPixelDensity;
+        //         strokeSize = prevStrokeSize;
+        //         return false;
+        //     }
+        // }
+
+        function regenerateSeed() {
+            seedValue = Math.floor(Math.random() * (Number.MAX_SAFE_INTEGER - 1)) + 1;
+            randomSeed(seedValue);
+        }
+
+        function generateFromInputs(options = {}) {
+            const { regenerateSeed: shouldRegenerateSeed = true } = options;
+            if (shouldRegenerateSeed) {
+                regenerateSeed();
+            } else if (typeof seedValue !== 'undefined') {
+                randomSeed(seedValue);
+            }
+            trace = [];
+            traceAnimation = [];
+            clear();
+
+            // Get all input values and set variables
+            periodX = parseFloat(document.getElementById("period-x").value);
+            periodY = parseFloat(document.getElementById("period-y").value);
+            periodOffsetX = parseFloat(document.getElementById("period-offset-x").value);
+            periodOffsetY = parseFloat(document.getElementById("period-offset-y").value);
+
+            // Apply the offsets to the periods
+            periodX += periodOffsetX;
+            periodY += periodOffsetY;
+            periodRatio = periodX / periodY;
+
+            // Get phase offsets
+
+            const phaseXElement = document.querySelector('input[name="phase-x"]:checked');
+            const phaseYElement = document.querySelector('input[name="phase-y"]:checked');
+            phaseOffsetObj = { "0": 0, "π/8": PI / 8, "π/4": PI / 4, "π/3": PI / 3, "π/2": PI / 2, "π": PI };
+            phaseOffsetX = phaseOffsetObj[phaseXElement.value];
+            phaseOffsetY = phaseOffsetObj[phaseYElement.value];
+            phaseOffsetStringX = phaseXElement.value;
+            phaseOffsetStringY = phaseYElement.value;
+
+            // Get line type
+            const lineTypeElement = document.querySelector('input[name="line-type"]:checked');
+            lineType = lineTypeElement.value === 'solid' ? null : LINES;
+
+            // Get mode
+            const modeElement = document.querySelector('input[name="mode"]:checked');
+            mode = modeElement.value; // "light" or "dark"
+
+            // Get color theme
+            const colorThemeElement = document.querySelector('input[name="color-theme"]:checked');
+            colorTheme = colorThemeElement.value;
+
+            // Get raw amplitude values (1-10)
+            amplitudeXRaw = parseInt(document.getElementById("amplitude-x").value);
+            amplitudeYRaw = parseInt(document.getElementById("amplitude-y").value);
+
+            // Get and map damping values
+            dampX = parseInt(document.getElementById("damping-x").value);
+            dampY = parseInt(document.getElementById("damping-y").value);
+
+            // Get cycle count
+            cycleCount = parseInt(document.getElementById("cycle-count").value);
+
+            // Call init() which will handle mapping amplitude values
+            init();
+        }
+
+        document.getElementById("generate-button").addEventListener("click", () => {
+            generateFromInputs();
+        });
+
+        document.getElementById("animate-button").addEventListener("click", () => {
+            clear();
+            if (clickState === 0) {
+                clickState = 1;
+                animateDrawing = false;
+                drawTrace();
+            } else if (clickState === 1) {
+                clickState = 0;
+                currentPoint = 0;
+                animateDrawing = true;
+                draw();
+            }
+        });
+
+        document.getElementById("period-x").addEventListener("input", function () {
+            document.getElementById("period-x-value").textContent = this.value + " s";
+        });
+
+        document.getElementById("period-y").addEventListener("input", function () {
+            document.getElementById("period-y-value").textContent = this.value + " s";
+        });
+
+        document.getElementById("amplitude-x").addEventListener("input", function () {
+            document.getElementById("amplitude-x-value").textContent = this.value;
+        });
+
+        document.getElementById("amplitude-y").addEventListener("input", function () {
+            document.getElementById("amplitude-y-value").textContent = this.value;
+        });
+
+        // Add these event listeners for damping sliders
+        function getDampingLabel(value) {
+            if (value < 1) return "None";
+            if (value < 15) return "Minimal";
+            if (value < 30) return "Very Low";
+            if (value < 45) return "Low";
+            if (value < 60) return "Medium";
+            if (value < 75) return "High";
+            if (value < 90) return "Very High";
+            return "Maximum";
+        }
+
+        document.getElementById("damping-x").addEventListener("input", function () {
+            document.getElementById("damping-x-value").textContent = getDampingLabel(this.value);
+        });
+
+        document.getElementById("damping-y").addEventListener("input", function () {
+            document.getElementById("damping-y-value").textContent = getDampingLabel(this.value);
+        });
+
+        document.getElementById("cycle-count").addEventListener("input", function () {
+            document.getElementById("cycle-count-value").textContent = this.value;
+        });
+
+        document.getElementById("random-button").addEventListener("click", () => {
+            // Temporarily disable auto-generate during randomization
+            const autoGenerateToggle = document.getElementById("auto-generate-toggle");
+            const wasAutoGenerate = autoGenerateToggle.checked;
+            autoGenerateToggle.checked = false;
+
+            // Randomize sliders
+            const sliders = {
+                "period-x": { min: 1, max: 10 },
+                "period-y": { min: 1, max: 10 },
+                "period-offset-x": { min: 0, max: 0.02 },
+                "period-offset-y": { min: 0, max: 0.02 },
+                "amplitude-x": { min: 1, max: 10 },
+                "amplitude-y": { min: 1, max: 10 },
+                "damping-x": { min: 0, max: 100 },
+                "damping-y": { min: 0, max: 100 },
+                "cycle-count": { min: 1, max: 500 }
+            };
+
+            // Set random values for all sliders
+            Object.entries(sliders).forEach(([id, range]) => {
+                const slider = document.getElementById(id);
+                let randomValue;
+
+                if (id.includes('period-offset')) {
+                    randomValue = Math.random() * range.max;
+                } else {
+                    randomValue = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+                }
+
+                slider.value = randomValue;
+                slider.dispatchEvent(new Event('input'));
+            });
+
+            // Randomize radio buttons
+            const radioGroups = ['phase-x', 'phase-y', 'line-type', 'mode', 'color-theme'];
+            radioGroups.forEach(groupName => {
+                const radioButtons = document.getElementsByName(groupName);
+                const randomIndex = Math.floor(Math.random() * radioButtons.length);
+                radioButtons[randomIndex].checked = true;
+            });
+
+            // Generate new pattern with random values
+            document.getElementById("generate-button").click();
+
+            // Restore auto-generate state
+            autoGenerateToggle.checked = wasAutoGenerate;
+        });
+
+        // Add these event listeners with the other slider listeners
+        document.getElementById("period-offset-x").addEventListener("input", function () {
+            document.getElementById("period-offset-x-value").textContent = parseFloat(this.value).toFixed(4) + " s";
+        });
+
+        document.getElementById("period-offset-y").addEventListener("input", function () {
+            document.getElementById("period-offset-y-value").textContent = parseFloat(this.value).toFixed(4) + " s";
+        });
+
+        // Function to handle control changes
+        function handleControlChange() {
+            // Clear any existing timer
+            clearTimeout(debounceTimer);
+
+            // Only auto-generate if toggle is checked
+            if (document.getElementById("auto-generate-toggle").checked) {
+                // Set a new timer
+                debounceTimer = setTimeout(() => {
+                    document.getElementById("generate-button").click();
+                }, 1000); // 1000ms = 1 second
+            }
+        }
+
+        function triggerInitialGeneration() {
+            const container = document.getElementById('canvas-container');
+            const remSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
+            const targetPadding = isMobile ? remSize : null;
+            let attempts = 0;
+            const maxAttempts = 30;
+
+            const tryGenerate = () => {
+                const style = getComputedStyle(container);
+                const paddingLeft = parseFloat(style.paddingLeft);
+                const paddingTop = parseFloat(style.paddingTop);
+                const hasMobilePadding = !isMobile || (
+                    Math.abs(paddingLeft - targetPadding) < 0.5 &&
+                    Math.abs(paddingTop - targetPadding) < 0.5
+                );
+
+                if (hasMobilePadding || attempts >= maxAttempts) {
+                    if (isMobile && !hasMobilePadding) {
+                        container.style.padding = '1rem';
+                    }
+                    document.getElementById("random-button").click();
+                    return;
+                }
+
+                attempts += 1;
+                requestAnimationFrame(tryGenerate);
+            };
+
+            requestAnimationFrame(tryGenerate);
+        }
+
+        // Add these event listeners for all controls
+        window.addEventListener('load', () => {
+            // Sliders
+            const sliders = [
+                "period-x", "period-y",
+                "period-offset-x", "period-offset-y",
+                "amplitude-x", "amplitude-y",
+                "damping-x", "damping-y",
+                "cycle-count"
+            ];
+
+            sliders.forEach(id => {
+                document.getElementById(id).addEventListener('input', handleControlChange);
+            });
+
+            // Radio buttons
+            const radioGroups = ['phase-x', 'phase-y', 'line-type', 'mode', 'color-theme'];
+            radioGroups.forEach(groupName => {
+                document.querySelectorAll(`input[name="${groupName}"]`).forEach(radio => {
+                    radio.addEventListener('change', handleControlChange);
+                });
+            });
+
+            // Add event listener for toggle switch
+            document.getElementById("auto-generate-toggle").addEventListener('change', function () {
+                if (!this.checked) {
+                    // Clear any pending auto-generate timer when turned off
+                    clearTimeout(debounceTimer);
+                } else {
+                    // Trigger generation when turned on
+                    setTimeout(() => {
+                        document.getElementById("generate-button").click();
+                    }, 300); // 300ms = 0.3 second
+                }
+            });
+
+            // Trigger random generation on initial load (after layout settles)
+            triggerInitialGeneration();
+
+            // Webflow can apply layout after load; re-render once layout stabilizes (mobile only)
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                setTimeout(() => generateFromInputs({ regenerateSeed: false }), 300);
+                setTimeout(() => generateFromInputs({ regenerateSeed: false }), 900);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (!window.matchMedia('(max-width: 768px)').matches) {
+                return;
+            }
+            clearTimeout(resizeDebounceTimer);
+            resizeDebounceTimer = setTimeout(() => {
+                generateFromInputs({ regenerateSeed: false });
+            }, 200);
+        });
+
+        // Mobile drawer controls
+        const toggleButton = document.getElementById('toggle-controls');
+        const controlPanel = document.getElementById('control-panel');
+
+        toggleButton.addEventListener('click', () => {
+            controlPanel.classList.toggle('open');
+        });
+
+        // Close drawer when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!controlPanel.contains(e.target) &&
+                !toggleButton.contains(e.target) &&
+                controlPanel.classList.contains('open')) {
+                controlPanel.classList.remove('open');
+            }
+        });
+
+    </script>
+</body>
+
+</html>

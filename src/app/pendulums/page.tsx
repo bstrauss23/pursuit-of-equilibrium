@@ -38,16 +38,28 @@ function Figure({
   );
 }
 
+function SectionDivider() {
+  return (
+    <div aria-hidden className="my-[calc(var(--section-gap)/2)] w-full px-4 md:px-6">
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-foreground/35 to-transparent" />
+    </div>
+  );
+}
+
 export default function PendulumsPage() {
   return (
     <section className="relative -mx-4 -mt-8 flex flex-col items-start justify-start overflow-x-clip md:-mx-6">
-      <div className="relative h-[55vh] w-full md:h-[80vh]">
+      <div className="relative h-[50vh] w-full md:h-[80vh]">
         <Image
           src="/hero-image-new.jpg"
           alt="Pendulums hero"
           fill
           priority
           className="object-cover brightness-70"
+          style={{
+            WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
+            maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
+          }}
         />
         <div className="pointer-events-none absolute inset-x-0 top-1/3 flex -translate-y-1/2 flex-col items-center gap-6 px-4 text-center md:gap-8">
           <div className="flex w-full max-w-[1700px] items-center gap-3 md:gap-6">
@@ -61,25 +73,42 @@ export default function PendulumsPage() {
           <h3 className="text-lg tracking-[0.08em] text-white md:text-xl">by BEN STRAUSS</h3>
         </div>
         <div className="pointer-events-none absolute top-0 right-0 left-0 h-24 bg-gradient-to-b from-black/20 to-transparent" />
-        <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-1/2 bg-gradient-to-b from-transparent to-background" />
       </div>
+
+      <section className="relative z-10 mx-auto content-width -mt-34 px-4 pt-14 pb-4 md:-mt-48 md:px-6 md:pt-20 md:pb-8">
+        <h2 className="mb-8 text-2xl tracking-[0.08em] text-foreground/80 md:mb-10 md:text-4xl md:text-center">
+          Motion Carries Structure
+        </h2>
+        <div className="space-y-8 text-lg leading-9 text-foreground/80">
+          <p>
+            <strong>Pendulums</strong> is a physics-driven generative art system modeled after a Blackburn pendulum.
+            Each artwork emerges from a unique configuration of forces including period ratios, amplitudes, damping,
+            and phase offsets.
+          </p>
+          <p>
+            Once initialized, the system runs deterministically. The motion unfolds stroke by stroke, revealing
+            patterns that are not drawn by hand but discovered through the behavior of the system itself.
+          </p>
+          <p>
+            The collection contains 512 outputs from this system, each representing a different physical
+            configuration.
+          </p>
+        </div>
+      </section>
+
+      <SectionDivider />
 
       <PendulumsSystemSection />
 
-      <div className="mt-20 mb-16 flex w-full items-center justify-center gap-4 md:mt-28 md:mb-20 md:gap-6">
+      <SectionDivider />
+
+      <div className="mb-12 flex w-full items-center justify-center gap-4 md:mb-16 md:gap-6">
         <span className="h-[2px] w-16 md:w-60 bg-gradient-to-r from-transparent to-foreground/40" />
         <h2 className="text-3xl text-foreground/80 md:text-5xl">About Pendulums</h2>
         <span className="h-[2px] w-16 md:w-60 bg-gradient-to-l from-transparent to-foreground/40" />
       </div>
 
-      <div id="the-gallery" className="scroll-mt-28 mx-auto w-full max-w-[1500px] px-4 md:px-6">
-        <PendulumsInterviewVideo
-          src="https://transientlabs.b-cdn.net/curated/Pendulums/pendulumsdraft4.mp4"
-          className="block h-auto w-full shadow-[0_2px_5px_#0003]"
-        />
-      </div>
-
-      <article id="about" className="scroll-mt-28 mx-auto w-full max-w-[1500px] px-4 py-20 md:px-6 md:py-24">
+      <article id="about" className="scroll-mt-28 mx-auto content-width px-4 pt-0 pb-10 md:px-6 md:pb-12">
         <div className="space-y-5 text-lg leading-8 text-foreground">
           <h3 className="text-2xl tracking-[0.08em]">MOTION AS MEMORY</h3>
           <p>
@@ -94,6 +123,13 @@ export default function PendulumsPage() {
             was not just solving problems anymore. It was making choices. Expressing
             something.
           </p>
+
+          <div id="the-gallery" className="scroll-mt-28 my-8">
+            <PendulumsInterviewVideo
+              src="https://transientlabs.b-cdn.net/curated/Pendulums/pendulumsdraft4.mp4"
+              className="block h-auto w-full shadow-[0_2px_5px_#0003]"
+            />
+          </div>
 
           <h3 className="pt-8 text-2xl tracking-[0.08em]">FROM LIGHT TO CODE</h3>
           <p>

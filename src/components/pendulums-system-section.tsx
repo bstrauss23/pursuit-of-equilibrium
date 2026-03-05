@@ -196,15 +196,15 @@ export function PendulumsSystemSection() {
   return (
     <section
       id="algorithm"
-      className="scroll-mt-28 mx-auto mb-16 w-full max-w-[1500px] overflow-x-clip px-4 pt-12 md:mb-24 md:px-6 md:pt-16"
+      className="scroll-mt-28 mx-auto content-width overflow-x-clip px-4 md:px-6"
     >
-      <div className="mb-6 flex items-center justify-center gap-4 md:mb-8 md:gap-6">
+      <div className="mb-12 flex items-center justify-center gap-4 md:mb-16 md:gap-6">
         <span className="h-[2px] w-16 md:w-60 bg-gradient-to-r from-transparent to-foreground/40" />
         <h2 className="text-3xl text-foreground/80 md:text-5xl">The System</h2>
         <span className="h-[2px] w-16 md:w-60 bg-gradient-to-l from-transparent to-foreground/40" />
       </div>
 
-      <p className="mx-auto mb-6 max-w-5xl text-center text-lg leading-8 text-foreground md:mb-8 md:text-left">
+      <p className="mx-auto content-width mb-6 text-left text-lg leading-8 text-foreground md:mb-8">
         This is the engine behind every piece in the collection. Each time you click Generate, a new system comes to
         life, just like it will during the actual mint. <strong>Click</strong> the artwork to watch the pendulum draw
         itself, stroke by stroke, in real time. You&apos;ll also find each generated artwork&apos;s output profile: a
@@ -212,7 +212,7 @@ export function PendulumsSystemSection() {
         and runtime.
       </p>
 
-      <div className="grid overflow-hidden border border-border bg-[#f8f6f1] shadow-[0_2px_5px_#0003] lg:h-[700px] lg:grid-cols-[700px_740px]">
+      <div className="grid overflow-hidden border border-border bg-[#f8f6f1] shadow-[0_2px_5px_#0003] lg:h-[700px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="min-w-0 h-[420px] overflow-hidden border-b border-border md:h-[520px] lg:h-full lg:border-r lg:border-b-0">
           <iframe
             key={seed}
@@ -223,7 +223,7 @@ export function PendulumsSystemSection() {
           />
         </div>
 
-        <aside className="flex min-w-0 h-full flex-col p-6 text-center md:p-8 md:text-left">
+        <aside className="flex min-w-0 h-full flex-col p-6 text-left md:p-8">
           <h3 className="mb-5 hidden text-2xl tracking-[0.08em] text-foreground/80 uppercase lg:block md:text-[2rem]">
             Output Profile
           </h3>

@@ -13,6 +13,13 @@ import {
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/components/ui/combobox";
 
 type Attribute = {
   trait_type: string;
@@ -54,6 +61,8 @@ type ListingInfo = {
   fetchedAt: string;
 };
 
+type ListedPriceSort = "price_desc" | "price_asc";
+
 const PAGE_SIZE = 60;
 const DESCRIPTION =
   "Pendulums began as a simulator, a way to preview the motion behind Chapter 1: Lux, a series of physical pendulum photographs shaped by light and time. But the code started to feel like something more. Each piece in Chapter 2 is the trace of a system in motion, governed by real physics: damping, amplitude, period ratios, decay. These are not imagined curves, but paths shaped by natural law, rendered in code. Some settle. Some resist. Each image is a fossil of energy resolving into stillness, a quiet record of the universe at work.";
@@ -65,6 +74,11 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "perfection_asc", label: "Perfection Score, low to high" },
   { value: "cycle_desc", label: "Cycle Count, high to low" },
   { value: "cycle_asc", label: "Cycle Count, low to high" },
+];
+
+const LISTED_PRICE_SORT_OPTIONS: Array<{ value: ListedPriceSort; label: string }> = [
+  { value: "price_desc", label: "Price: High to low" },
+  { value: "price_asc", label: "Price: Low to high" },
 ];
 
 function normalize(value: unknown) {
@@ -148,6 +162,7 @@ export function PendulumsGallery() {
   const [sort, setSort] = useState<SortMode>("token_asc");
   const [selected, setSelected] = useState<Map<string, Set<string>>>(new Map());
   const [onlyListed, setOnlyListed] = useState(false);
+  const [listedPriceSort, setListedPriceSort] = useState<ListedPriceSort>("price_desc");
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activeItem, setActiveItem] = useState<PendulumItem | null>(null);
@@ -158,6 +173,8 @@ export function PendulumsGallery() {
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const query = search.trim().toLowerCase();
+  const listedSortLabel =
+    LISTED_PRICE_SORT_OPTIONS.find((option) => option.value === listedPriceSort)?.label ?? "Sort by price";
 
   useEffect(() => {
     let isMounted = true;
@@ -236,8 +253,28 @@ export function PendulumsGallery() {
 
   const filteredSorted = useMemo(() => {
     if (!onlyListed) return baseFilteredSorted;
-    return baseFilteredSorted.filter((item) => listingByTokenId[item.token_id]?.isListed);
-  }, [baseFilteredSorted, listingByTokenId, onlyListed]);
+    const listed = baseFilteredSorted.filter((item) => listingByTokenId[item.token_id]?.isListed);
+    const dir = listedPriceSort === "price_desc" ? -1 : 1;
+
+    listed.sort((a, b) => {
+      const rawA = listingByTokenId[a.token_id]?.rawPrice;
+      const rawB = listingByTokenId[b.token_id]?.rawPrice;
+      if (!rawA && !rawB) return 0;
+      if (!rawA) return 1;
+      if (!rawB) return -1;
+
+      try {
+        const priceA = BigInt(rawA);
+        const priceB = BigInt(rawB);
+        if (priceA === priceB) return 0;
+        return priceA > priceB ? dir : -dir;
+      } catch {
+        return 0;
+      }
+    });
+
+    return listed;
+  }, [baseFilteredSorted, listingByTokenId, onlyListed, listedPriceSort]);
 
   const visibleItems = useMemo(
     () => filteredSorted.slice(0, visibleCount),
@@ -343,6 +380,7 @@ export function PendulumsGallery() {
     setSelected(new Map());
     setSort("token_asc");
     setOnlyListed(false);
+    setListedPriceSort("price_desc");
   }
 
   function applySingleAttributeFilter(trait: string, value: string) {
@@ -446,14 +484,24 @@ export function PendulumsGallery() {
 
   return (
     <section className="mx-auto w-full max-w-[1600px] px-4 py-8 md:px-6">
-      <div className="mb-6 flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-3xl tracking-[0.08em] md:text-5xl">THE GALLERY</h1>
-          <p className="mt-2 text-sm text-muted-foreground">All 512 Pendulums, searchable and trait-filterable.</p>
+      <div className="mb-6 flex flex-col items-start gap-4">
+        <div className="w-full">
+          <div className="mb-12 flex items-center justify-center gap-4 md:mb-16 md:gap-6">
+            <span className="h-[2px] w-16 bg-gradient-to-r from-transparent to-foreground/40 md:w-60" />
+            <h1 className="text-3xl text-foreground/80 md:text-5xl">The Gallery</h1>
+            <span className="h-[2px] w-16 bg-gradient-to-l from-transparent to-foreground/40 md:w-60" />
+          </div>
+          <p className="mb-10 text-lg leading-8 text-foreground/80">
+            This gallery presents the complete Pendulums collection of 512 works. Use the filters to explore the
+            system from different angles, sorting pieces by parameters such as period ratios, amplitudes, damping,
+            cycle count, and more. Each artwork includes its full output profile, revealing the variables that shaped
+            its motion. You can also view current market listings and link directly to OpenSea to see the piece in
+            the secondary market.
+          </p>
         </div>
         <div className="flex w-full flex-col items-start gap-2 md:w-auto md:max-w-[48vw] md:items-end">
           <div className="flex items-center gap-2">
-            <Drawer open={isFiltersOpen} onOpenChange={setIsFiltersOpen} direction={isDesktop ? "right" : "bottom"}>
+            <Drawer open={isFiltersOpen} onOpenChange={setIsFiltersOpen} direction={isDesktop ? "left" : "bottom"}>
               <button
                 type="button"
                 className="border border-border bg-background px-3 py-2 text-sm"
@@ -509,64 +557,95 @@ export function PendulumsGallery() {
           {!loading && !error ? (
             <>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={onlyListed}
+                      onCheckedChange={(checked) => {
+                        setVisibleCount(PAGE_SIZE);
+                        setOnlyListed(checked === true);
+                      }}
+                      aria-label="Only show listed pendulums"
+                    />
+                    <span>Only show Listed</span>
+                  </label>
+                  <div
+                    className={`h-9 min-w-[190px] ${
+                      onlyListed ? "visible" : "pointer-events-none invisible"
+                    }`}
+                  >
+                    <Combobox
+                      value={listedPriceSort}
+                      onValueChange={(value) => setListedPriceSort(value as ListedPriceSort)}
+                    >
+                      <ComboboxTrigger className="flex w-full items-center justify-between whitespace-nowrap border border-border bg-background px-3 py-2 text-sm">
+                        {listedSortLabel}
+                      </ComboboxTrigger>
+                      <ComboboxContent>
+                        <ComboboxList>
+                          {LISTED_PRICE_SORT_OPTIONS.map((option) => (
+                            <ComboboxItem key={option.value} value={option.value}>
+                              {option.label}
+                            </ComboboxItem>
+                          ))}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  </div>
+                </div>
+                <p className="text-right text-sm text-muted-foreground">
                   Showing {filteredSorted.length} of {all.length}.
                 </p>
-                <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={onlyListed}
-                    onCheckedChange={(checked) => {
-                      setVisibleCount(PAGE_SIZE);
-                      setOnlyListed(checked === true);
-                    }}
-                    aria-label="Only show listed pendulums"
-                  />
-                  <span>Only show Listed</span>
-                </label>
               </div>
               {onlyListed && listingsLoading ? (
                 <p className="mb-4 text-xs text-muted-foreground">Checking listings...</p>
               ) : null}
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
-                {visibleItems.map((item) => (
-                  <button
-                    key={item.token_id}
-                    type="button"
-                    onClick={() => setActiveItem(item)}
-                    className="overflow-hidden border border-border bg-[#fffcf7] text-left shadow-[0_2px_5px_#0003] transition-transform hover:scale-[1.02]"
-                  >
-                    <img
-                      src={item.image_uri}
-                      alt={item.name}
-                      loading="lazy"
-                      decoding="async"
-                      referrerPolicy="no-referrer"
-                      className="block aspect-square w-full bg-background object-cover"
-                    />
-                    <div className="grid gap-1 p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm">{item.name}</p>
-                        {listingByTokenId[item.token_id]?.isListed ? (
-                          <Badge
-                            aria-label="Active OpenSea listing"
-                            title="Active OpenSea listing"
-                            className="border-green-700 bg-green-100 text-green-900"
-                          >
-                            Listed
-                          </Badge>
+                {visibleItems.map((item) => {
+                  const listing = listingByTokenId[item.token_id];
+                  const listingLabel =
+                    listing?.isListed && listing.displayPrice ? `Listed · ${listing.displayPrice}` : "Listed";
+
+                  return (
+                    <button
+                      key={item.token_id}
+                      type="button"
+                      onClick={() => setActiveItem(item)}
+                      className="overflow-hidden border border-border bg-[#fffcf7] text-left shadow-[0_2px_5px_#0003] transition-transform hover:scale-[1.02]"
+                    >
+                      <img
+                        src={item.image_uri}
+                        alt={item.name}
+                        loading="lazy"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                        className="block aspect-square w-full bg-background object-cover"
+                      />
+                      <div className="grid gap-1 p-3">
+                        <div className="grid gap-1">
+                          <p className="text-sm">{item.name}</p>
+                          {listing?.isListed ? (
+                            <Badge
+                              aria-label="Active OpenSea listing"
+                              title={listingLabel}
+                              className="w-fit border-green-700 bg-green-100 text-[10px] text-green-900"
+                            >
+                              {listingLabel}
+                            </Badge>
+                          ) : null}
+                        </div>
+                        {sort.startsWith("perfection_") ? (
+                          <p className="text-xs text-muted-foreground">
+                            Perfection Score: {item.perfection_score ?? "n/a"}
+                          </p>
+                        ) : null}
+                        {sort.startsWith("cycle_") ? (
+                          <p className="text-xs text-muted-foreground">Cycle Count: {item.cycle_count ?? "n/a"}</p>
                         ) : null}
                       </div>
-                      {sort.startsWith("perfection_") ? (
-                        <p className="text-xs text-muted-foreground">
-                          Perfection Score: {item.perfection_score ?? "n/a"}
-                        </p>
-                      ) : null}
-                      {sort.startsWith("cycle_") ? (
-                        <p className="text-xs text-muted-foreground">Cycle Count: {item.cycle_count ?? "n/a"}</p>
-                      ) : null}
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             </>
           ) : null}

@@ -8,10 +8,10 @@ import { useEffect, useState } from "react";
 const defaultNavItems = [
   { href: "/lux", label: "Lux" },
   { href: "/pendulums", label: "Pendulums" },
-  { href: "/pendulums/gallery", label: "The Gallery" },
-  { href: "/pendulums#about", label: "About" },
   { href: "/pendulums#algorithm", label: "Algorithm" },
-  { href: "/pendulums#playground", label: "Playground" },
+  { href: "/pendulums#about", label: "About" },
+  { href: "/pendulums/gallery", label: "The Gallery" },
+  { href: "/pendulums/playground", label: "Playground" },
 ];
 
 export function SiteHeader() {
@@ -35,6 +35,20 @@ export function SiteHeader() {
       return hash.length === 0;
     }
     return hash === `#${hrefHash}`;
+  }
+
+  function onNavClick(event: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    const [hrefPath, hrefHash = ""] = href.split("#");
+    if (!hrefHash) return;
+    if (hrefPath !== pathname) return;
+
+    const target = document.getElementById(hrefHash);
+    if (!target) return;
+
+    event.preventDefault();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.pushState(null, "", `#${hrefHash}`);
+    setHash(`#${hrefHash}`);
   }
 
   return (
@@ -62,6 +76,7 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={(event) => onNavClick(event, item.href)}
                 className={`text-lg transition-colors hover:text-foreground ${
                   isActiveHref(item.href)
                     ? "text-foreground underline underline-offset-4"
