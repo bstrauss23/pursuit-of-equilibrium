@@ -1,0 +1,507 @@
+[
+    {
+        "name": "Lux No. 1",
+        "description": "The story begins with the simple pendulum, and represents the minimalistic, yet elegant designs that exist at the core of the Universal code. Welcome to the Genesis of “Pursuit of Equilibrium”.",
+        "image": "ipfs://QmSFL5c3kGtkyTwFGmDABKZszmDJvJC4U3mcjNa4azVnij",
+        "image_details": {
+            "bytes": 11435578,
+            "format": "JPEG",
+            "sha256": "82e77c91004290207654825e6d9ac1cc67d399cbb9d6796ee21fa42f33ce3648",
+            "width": 7454,
+            "height": 7454
+        },
+        "tags": [
+            "Photography",
+            "Generative Art",
+            "Pendulum",
+            "Physics",
+            "Universe",
+            "Light Painting"
+        ],
+        "attributes": [
+            {
+                "trait_type": "System",
+                "value": "Simple Pendulum"
+            },
+            {
+                "trait_type": "Modal Ratio",
+                "value": "1:1"
+            },
+            {
+                "trait_type": "Harmonic Series",
+                "value": "Octave"
+            },
+            {
+                "trait_type": "Red",
+                "value": "15.1%"
+            },
+            {
+                "trait_type": "Orange",
+                "value": "4.8%"
+            },
+            {
+                "trait_type": "Yellow",
+                "value": "2.4%"
+            },
+            {
+                "trait_type": "Black",
+                "value": "77.7%"
+            },
+            {
+                "trait_type": "Line Pattern",
+                "value": "Solid"
+            },
+            {
+                "trait_type": "Exposure Time",
+                "value": "240 seconds"
+            }
+        ],
+        "artist": "Ben Strauss"
+    },
+    {
+        "name": "Lux No. 2",
+        "description": "The story continues with the Blackburn pendulum, and represents the more complex, yet elegant designs that exist at the core of the fundamental code. When you begin to look closely at the Universe, it sometimes feels like the Universe is staring right back at you.",
+        "attributes": [
+            {
+                "trait_type": "System",
+                "value": "Blackburn Pendulum"
+            },
+            {
+                "trait_type": "Modal Ratio",
+                "value": "2:1"
+            },
+            {
+                "trait_type": "Harmonic Series",
+                "value": "Octave"
+            },
+            {
+                "trait_type": "Blue",
+                "value": "4.02%"
+            },
+            {
+                "trait_type": "Cyan",
+                "value": "0.92%"
+            },
+            {
+                "trait_type": "Green",
+                "value": "1.23%"
+            },
+            {
+                "trait_type": "Light Blue",
+                "value": "0.43%"
+            },
+            {
+                "trait_type": "Lime",
+                "value": "0.07%"
+            },
+            {
+                "trait_type": "Magenta",
+                "value": "0.69%"
+            },
+            {
+                "trait_type": "Mint",
+                "value": "0.33%"
+            },
+            {
+                "trait_type": "Orange",
+                "value": "1.05%"
+            },
+            {
+                "trait_type": "Pink",
+                "value": "0.48%"
+            },
+            {
+                "trait_type": "Purple",
+                "value": "1.78%"
+            },
+            {
+                "trait_type": "Red",
+                "value": "2.44%"
+            },
+            {
+                "trait_type": "Black",
+                "value": "85.7%"
+            },
+            {
+                "trait_type": "Line Pattern",
+                "value": "Solid"
+            },
+            {
+                "trait_type": "Exposure Time",
+                "value": "60 seconds"
+            }
+        ],
+        "tags": [
+            "Photography",
+            "Generative Art",
+            "Pendulum",
+            "Physics",
+            "Universe",
+            "Light Painting",
+            "Strauss"
+        ],
+        "image": "https://arweave.net/WRAIlfFd_4J6F9dC2hFFrVi_es9LvsyEqn53VuzutFs",
+        "image_sha256": "8a85a8a6b126a99c5740ddefadcb766840a9341346e05ab728f732210b351970",
+        "media": {
+            "uri": "https://arweave.net/WRAIlfFd_4J6F9dC2hFFrVi_es9LvsyEqn53VuzutFs",
+            "size": "15975441",
+            "dimensions": "9262x7970",
+            "mimeType": "image/jpeg"
+        }
+    },
+    {
+        "name": "Lux No. 3",
+        "description": "Lux No. 3 reveals the hidden fabric woven by time and gravity, an elegant design that exists at the core of the fundamental code. Though it appears to be three-dimensional, the Universe is adept at misleading the senses, and the deeper your gaze, the further it pulls you into its captivating mirages.",
+        "image": "ipfs://QmP9K3bwvCRRMWfBUon33Md21tz6gMkSQM9QyRDxGs3z23/media",
+        "image_sha256": "63303e27860cff793e23ed3925fd4d99011a36fd4278dde6265f95734d802c41",
+        "attributes": [
+            {
+                "trait_type": "System",
+                "value": "Blackburn Pendulum"
+            },
+            {
+                "trait_type": "Modal Ratio",
+                "value": "2:3"
+            },
+            {
+                "trait_type": "Harmonic Series",
+                "value": "Perfect Fifth"
+            },
+            {
+                "trait_type": "Blue",
+                "value": "13.67%"
+            },
+            {
+                "trait_type": "Cyan",
+                "value": "2.93%"
+            },
+            {
+                "trait_type": "Green",
+                "value": "0.81%"
+            },
+            {
+                "trait_type": "Light Blue",
+                "value": "1.51%"
+            },
+            {
+                "trait_type": "Mint",
+                "value": "0.23%"
+            },
+            {
+                "trait_type": "Black",
+                "value": "80.85%"
+            },
+            {
+                "trait_type": "Line Pattern",
+                "value": "Dashed"
+            },
+            {
+                "trait_type": "Exposure Time",
+                "value": "240 seconds"
+            }
+        ],
+        "tags": [
+            "Photography",
+            "Generative Art",
+            "Pendulum",
+            "Physics",
+            "Universe",
+            "Light Painting",
+            "Strauss"
+        ],
+        "media": {
+            "uri": "ipfs://QmP9K3bwvCRRMWfBUon33Md21tz6gMkSQM9QyRDxGs3z23/media",
+            "dimensions": "7133x8915",
+            "size": "17732737",
+            "mimeType": "image/jpeg"
+        }
+    },
+    {
+        "name": "Lux No. 4",
+        "description": "An early artifact from before the pendulum was fully tamed, Lux No. 4 pulses with a kind of intentional imbalance. A green and gold figure cradled in darkness, its surface hums with structured imperfection. The dashed light trails evoke the texture of scales, as if this were some ancient, breathing relic. Like a dragon’s egg forged from gravitational rhythm, it reminds us that chaos and order aren’t opposites, they’re dance partners.",
+        "image": "ipfs://QmaWCxJkGPtyyouZSnrm7QaCYqfSPUD3uLkP43W7c7xkmX/media",
+        "image_sha256": "cb1ca60952ba62a1cf6a39702b98f514fd315323abd87bfa1e7f6743c00ac25f",
+        "attributes": [
+            {
+                "trait_type": "System",
+                "value": "Blackburn Pendulum"
+            },
+            {
+                "trait_type": "Modal Ratio",
+                "value": "1:1"
+            },
+            {
+                "trait_type": "Harmonic Series",
+                "value": "Octave"
+            },
+            {
+                "trait_type": "Green",
+                "value": "2.97%"
+            },
+            {
+                "trait_type": "Lime",
+                "value": "0.12%"
+            },
+            {
+                "trait_type": "Mint",
+                "value": "0.30%"
+            },
+            {
+                "trait_type": "Orange",
+                "value": "0.28%"
+            },
+            {
+                "trait_type": "Yellow",
+                "value": "2.16%"
+            },
+            {
+                "trait_type": "Black",
+                "value": "94.05%"
+            },
+            {
+                "trait_type": "Line Pattern",
+                "value": "Dashed"
+            },
+            {
+                "trait_type": "Exposure Time",
+                "value": "120 seconds"
+            }
+        ],
+        "tags": [
+            "Photography",
+            "Generative Art",
+            "Pendulum",
+            "Physics",
+            "Universe",
+            "Light Painting",
+            "Strauss"
+        ],
+        "media": {
+            "uri": "ipfs://QmaWCxJkGPtyyouZSnrm7QaCYqfSPUD3uLkP43W7c7xkmX/media",
+            "dimensions": "8505x10632",
+            "size": "12154497",
+            "mimeType": "image/jpeg"
+        }
+    },
+    {
+        "name": "Lux No. 5",
+        "description": "This is the tension you feel just before something breaks, or becomes something new.\nA harmonic interval of 7:5, expressed as light and gravity, it loops in on itself with impossible precision.\nThe form is taut. Bound. Like a rope caught mid-unravel.\nEach stroke is balance under pressure.\nA tritone in motion.",
+        "image": "ipfs://QmWxNkZboNJBaU4rtj5jswQuiVYejd6oEQKPKSn3zv2Zo1/media",
+        "image_sha256": "b50af50e0e5e42c0c213972809918d05c261ca3b3a4fd6cde81b64a7f8b0f81a",
+        "attributes": [
+            {
+                "trait_type": "System",
+                "value": "Blackburn Pendulum"
+            },
+            {
+                "trait_type": "Modal Ratio",
+                "value": "7:5"
+            },
+            {
+                "trait_type": "Harmonic Series",
+                "value": "Septimal Tritone (lesser)"
+            },
+            {
+                "trait_type": "Red",
+                "value": "4.94%"
+            },
+            {
+                "trait_type": "Orange",
+                "value": "2.87%"
+            },
+            {
+                "trait_type": "Yellow",
+                "value": "2.49%"
+            },
+            {
+                "trait_type": "Black",
+                "value": "89.70%"
+            },
+            {
+                "trait_type": "Line Pattern",
+                "value": "Dashed"
+            },
+            {
+                "trait_type": "Exposure Time",
+                "value": "90 seconds"
+            }
+        ],
+        "tags": [
+            "Photography",
+            "Generative Art",
+            "Pendulum",
+            "Physics",
+            "Universe",
+            "Light Painting",
+            "Strauss"
+        ],
+        "media": {
+            "uri": "ipfs://QmWxNkZboNJBaU4rtj5jswQuiVYejd6oEQKPKSn3zv2Zo1/media",
+            "dimensions": "5035x7286",
+            "size": "15039128",
+            "mimeType": "image/jpeg"
+        }
+    },
+    {
+        "name": "Lux No. 6",
+        "description": "This piece is built on a 4:5 period ratio, the major third, a harmonic interval universally associated with joy and happiness. In music, it’s a sound that feels open and uplifting. In the motion of a Blackburn pendulum, that same ratio becomes a path of light, each swing tracing its way toward balance. The result is a pattern that, almost impossibly, takes the form of a heart. As if the system itself understood the emotion it carried.",
+        "image": "ipfs://QmcmxoUFGUhDPnhXDwam6dv2qpsDLNS4mpP6brB6Br1heT/media",
+        "image_sha256": "59174e0c94754df4db1685871f6fb5f5702450b747f6b4701f584ff77852f201",
+        "attributes": [
+            {
+                "trait_type": "System",
+                "value": "Blackburn Pendulum"
+            },
+            {
+                "trait_type": "Modal Ratio",
+                "value": "4:5"
+            },
+            {
+                "trait_type": "Harmonic Series",
+                "value": "Major Third"
+            },
+            {
+                "trait_type": "Blue",
+                "value": "13.60%"
+            },
+            {
+                "trait_type": "Magenta",
+                "value": "4.14%"
+            },
+            {
+                "trait_type": "Pink",
+                "value": "1.71%"
+            },
+            {
+                "trait_type": "Purple",
+                "value": "5.54%"
+            },
+            {
+                "trait_type": "Red",
+                "value": "0.75%"
+            },
+            {
+                "trait_type": "Black",
+                "value": "74.25%"
+            },
+            {
+                "trait_type": "Line Pattern",
+                "value": "Solid"
+            },
+            {
+                "trait_type": "Exposure Time",
+                "value": "180 seconds"
+            }
+        ],
+        "tags": [
+            "Photography",
+            "Generative Art",
+            "Pendulum",
+            "Physics",
+            "Universe",
+            "Light Painting",
+            "Strauss"
+        ],
+        "media": {
+            "uri": "ipfs://QmcmxoUFGUhDPnhXDwam6dv2qpsDLNS4mpP6brB6Br1heT/media",
+            "dimensions": "6867x8584",
+            "size": "18997814",
+            "mimeType": "image/jpeg"
+        }
+    },
+    {
+        "name": "Lux No. 7",
+        "description": "The final piece of Chapter 1, Lux No. 7 circles back to the beginning.\nLike Lux No. 1, it rests on the simplest of ratios: 1:1. As a harmonic interval, this ratio represents the octave. A return to the original note, but a different frequency.\nBut nothing repeats perfectly. A slight offset in the period ratio bends the path, folding the figure back on itself. What should be a circle becomes the illusion of a ribbon-like fabric, light weaving over light, balance held just off-center.\n\nThe palette hums in three dominant voices: violet, cyan, and gold. Together they refract into a spectrum, a reminder that no color, like no system, stands alone.\n\nAcross seven works, Lux has traced the hidden harmonies of the Blackburn pendulum. From tension to release, from imbalance to resolution, each piece marked a different mode of gravity made visible. Lux No. 7 brings it full cycle.\n\nLux ends where it began, not as an ultimate conclusion, but as the foundation for what comes next.",
+        "image": "ipfs://QmVNPKpUyvWw7GioBDmECuMkb4czJoR3GLJUN9TUv4R9ZU/media",
+        "image_sha256": "43be76573799d7441135a131d3ab28fe2d3dbae8c5e4d981687d7cb6f6cfa1c5",
+        "attributes": [
+            {
+                "trait_type": "System",
+                "value": "Blackburn Pendulum"
+            },
+            {
+                "trait_type": "Modal Ratio",
+                "value": "1:1"
+            },
+            {
+                "trait_type": "Harmonic Series",
+                "value": "Octave"
+            },
+            {
+                "trait_type": "Blue",
+                "value": "8.16%"
+            },
+            {
+                "trait_type": "Cyan",
+                "value": "2.76%"
+            },
+            {
+                "trait_type": "Green",
+                "value": "0.14%"
+            },
+            {
+                "trait_type": "Light Blue",
+                "value": "1.09%"
+            },
+            {
+                "trait_type": "Lime",
+                "value": "0.09%"
+            },
+            {
+                "trait_type": "Magenta",
+                "value": "0.22%"
+            },
+            {
+                "trait_type": "Mint",
+                "value": "0.48%"
+            },
+            {
+                "trait_type": "Orange",
+                "value": "0.83%"
+            },
+            {
+                "trait_type": "Pink",
+                "value": "0.08%"
+            },
+            {
+                "trait_type": "Purple",
+                "value": "1.15%"
+            },
+            {
+                "trait_type": "Red",
+                "value": "0.13%"
+            },
+            {
+                "trait_type": "Yellow",
+                "value": "0.89%"
+            },
+            {
+                "trait_type": "Black",
+                "value": "83.80%"
+            },
+            {
+                "trait_type": "Line Pattern",
+                "value": "Dashed"
+            },
+            {
+                "trait_type": "Exposure Time",
+                "value": "300 seconds"
+            }
+        ],
+        "tags": [
+            "Photography",
+            "Generative Art",
+            "Pendulum",
+            "Physics",
+            "Universe",
+            "Light Painting",
+            "Strauss"
+        ],
+        "media": {
+            "uri": "ipfs://QmVNPKpUyvWw7GioBDmECuMkb4czJoR3GLJUN9TUv4R9ZU/media",
+            "dimensions": "7403x7403",
+            "size": "12723098",
+            "mimeType": "image/jpeg"
+        }
+    }
+]

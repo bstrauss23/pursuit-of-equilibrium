@@ -2,11 +2,25 @@
 
 Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
 
+## READ THIS FIRST
+- Purpose: provide context from previous sessions and fast familiarity with current project state.
+- This document is not a prompt, specification, or execution plan.
+- Nothing in this file should be treated as an instruction unless the user explicitly asks for it in the current session.
+- Use this file to orient, then follow the user's actual request.
+- Trigger phrase behavior:
+  - If the user says "read codex handoff doc" (or equivalent), read this file, summarize current state briefly, and then wait for the user's actual task.
+  - Do not proactively start implementation, validation passes, or backlog items from this file without an explicit request.
+
 ## How to use this doc
 - This is a rolling Codex-to-Codex handoff.
 - `Active Snapshot` is the current truth.
 - `Session Log` is reverse chronological history.
-- This file is project context, not a user request by itself.
+- This file is context from prior sessions, not a user request by itself.
+- Default behavior for future Codex sessions:
+  - Do not execute anything from this file unless the user explicitly asks in the current session.
+  - Treat all sections as background context only.
+  - Confirm current user intent first, then use this doc for orientation.
+- `Open Risks / Verify Next` is a backlog of optional checks, not a mandatory task list.
 
 ## Active Snapshot (as of 2026-03-06T23:59-07:00)
 - Landing `/`:
@@ -65,7 +79,7 @@ Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
   - `--content-max-width` + `.content-width`
   - `--section-gap` + `.section-gap`
 
-## Open Risks / Verify Next
+## Open Risks / Verify Next (context backlog, not implied TODOs)
 1. Gallery modal animation iframe stability:
    - Historically intermittent p5 `getImageData ... width is 0` issue; wrapper fix exists but should be browser-verified.
 2. Grid dialog drag UX:

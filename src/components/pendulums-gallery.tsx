@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { type SyntheticEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Drawer,
@@ -72,6 +72,8 @@ type ListedPriceSort = "price_desc" | "price_asc";
 const PAGE_SIZE = 60;
 const MIN_GRID_EXPORT_SIZE = 4096;
 const PREVIEW_GRID_GAP_PX = 2;
+const IPFS_PRIMARY_GATEWAY = "https://ipfs.io/ipfs/";
+const IPFS_FALLBACK_GATEWAY = "https://dweb.link/ipfs/";
 const DESCRIPTION =
   "Pendulums began as a simulator, a way to preview the motion behind Chapter 1: Lux, a series of physical pendulum photographs shaped by light and time. But the code started to feel like something more. Each piece in Chapter 2 is the trace of a system in motion, governed by real physics: damping, amplitude, period ratios, decay. These are not imagined curves, but paths shaped by natural law, rendered in code. Some settle. Some resist. Each image is a fossil of energy resolving into stillness, a quiet record of the universe at work.";
 
@@ -91,6 +93,40 @@ const LISTED_PRICE_SORT_OPTIONS: Array<{ value: ListedPriceSort; label: string }
 
 function normalize(value: unknown) {
   return String(value ?? "").trim();
+}
+
+function toIpfsFallbackUrl(url: string): string | null {
+  if (!url) return null;
+  if (url.startsWith(IPFS_FALLBACK_GATEWAY)) return null;
+  if (url.startsWith(IPFS_PRIMARY_GATEWAY)) {
+    return url.replace(IPFS_PRIMARY_GATEWAY, IPFS_FALLBACK_GATEWAY);
+  }
+  if (url.startsWith("ipfs://")) {
+    return `${IPFS_FALLBACK_GATEWAY}${url.replace("ipfs://", "")}`;
+  }
+  return null;
+}
+
+function handleIpfsImageError(event: SyntheticEvent<HTMLImageElement>) {
+  const element = event.currentTarget;
+  if (element.dataset.ipfsFallbackTried === "true") return;
+
+  const fallbackUrl = toIpfsFallbackUrl(element.currentSrc || element.src);
+  if (!fallbackUrl) return;
+
+  element.dataset.ipfsFallbackTried = "true";
+  element.src = fallbackUrl;
+}
+
+function handleIpfsIframeError(event: SyntheticEvent<HTMLIFrameElement>) {
+  const element = event.currentTarget;
+  if (element.dataset.ipfsFallbackTried === "true") return;
+
+  const fallbackUrl = toIpfsFallbackUrl(element.src);
+  if (!fallbackUrl) return;
+
+  element.dataset.ipfsFallbackTried = "true";
+  element.src = fallbackUrl;
 }
 
 function toNumber(value: unknown) {
@@ -150,11 +186,19 @@ function getOptimalGridDimensions(count: number) {
 
 function loadImage(url: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
+    const fallbackUrl = toIpfsFallbackUrl(url);
     const image = new Image();
     image.crossOrigin = "anonymous";
     image.referrerPolicy = "no-referrer";
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+    image.onerror = () => {
+      if (!fallbackUrl || image.dataset.ipfsFallbackTried === "true") {
+        reject(new Error(`Failed to load image: ${url}`));
+        return;
+      }
+      image.dataset.ipfsFallbackTried = "true";
+      image.src = fallbackUrl;
+    };
     image.src = url;
   });
 }
@@ -975,6 +1019,7 @@ export function PendulumsGallery() {
                         loading="lazy"
                         decoding="async"
                         referrerPolicy="no-referrer"
+                        onError={handleIpfsImageError}
                         className="block aspect-square w-full bg-background object-cover"
                       />
                       <div className="grid gap-1 p-3">
@@ -1134,6 +1179,7 @@ export function PendulumsGallery() {
                             loading="eager"
                             decoding="async"
                             referrerPolicy="no-referrer"
+                            onError={handleIpfsImageError}
                             className="block h-full w-full object-cover"
                             draggable={false}
                           />
@@ -1162,6 +1208,7 @@ export function PendulumsGallery() {
                       loading="eager"
                       decoding="async"
                       referrerPolicy="no-referrer"
+                      onError={handleIpfsImageError}
                       className="block h-full w-full object-cover"
                       draggable={false}
                     />
@@ -1226,6 +1273,7 @@ export function PendulumsGallery() {
                       <iframe
                         src={activeItem.animation_url}
                         title={activeItem.name}
+                        onError={handleIpfsIframeError}
                         className="absolute inset-0 h-full w-full border-0"
                       />
                     </div>
@@ -1235,6 +1283,7 @@ export function PendulumsGallery() {
                         src={activeItem.image_uri}
                         alt={activeItem.name}
                         referrerPolicy="no-referrer"
+                        onError={handleIpfsImageError}
                         className="block h-full w-full object-cover"
                       />
                     </div>

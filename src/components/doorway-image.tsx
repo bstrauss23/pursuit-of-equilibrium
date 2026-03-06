@@ -26,6 +26,8 @@ export function DoorwayImage({
       alt={alt}
       fill
       priority={priority}
+      sizes="(max-width: 768px) 100vw, 50vw"
+      quality={70}
       onLoad={() => {
         setLoaded(true);
         onLoaded();
