@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PendulumsInterviewVideo } from "@/components/pendulums-interview-video";
 import { PendulumsSystemSection } from "@/components/pendulums-system-section";
+import { DeferredHeroIframe } from "@/components/deferred-hero-iframe";
 
 const perfectionTabs = [
   { name: "Emergent", images: [1, 2, 3, 4] },
@@ -65,34 +66,32 @@ export default function PendulumsPage() {
             fill
             priority
             aria-hidden
-            className="object-cover opacity-90"
+            className="object-cover opacity-80"
           />
-          <iframe
+          <DeferredHeroIframe
             src="/pendulums-hero-script.html?v=10"
             title="Pendulums hero background"
-            className="absolute inset-0 h-full w-full border-0 opacity-75"
-            loading="eager"
+            className="pointer-events-none absolute inset-0 h-full w-full border-0 opacity-50"
           />
         </div>
         <div className="pointer-events-none absolute inset-x-0 top-1/3 flex -translate-y-1/2 flex-col items-center gap-6 px-4 text-center md:gap-8">
-          <div className="flex w-full max-w-[1700px] items-center gap-3 md:gap-6">
-            <span className="h-[2px] flex-1 bg-gradient-to-r from-transparent to-foreground/40" />
-            <h1 className="text-4xl tracking-[0.2em] text-[#333333] md:text-9xl">PENDULUMS</h1>
-            <span className="h-[2px] flex-1 bg-gradient-to-l from-transparent to-foreground/40" />
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-sm tracking-[0.2em] text-[#333333] uppercase md:text-lg">Chapter 2</p>
+            <h1 className="text-4xl tracking-[0.2em] text-[#333333] md:text-8xl">PENDULUMS</h1>
           </div>
-          <h2 className="text-lg tracking-[0.08em] text-[#333333] md:text-3xl">
+          <h2 className="text-lg tracking-[0.08em] text-[#333333] md:text-2xl">
             A PHYSICS-BASED GENERATIVE ART COLLECTION
           </h2>
-          <h3 className="text-lg tracking-[0.08em] text-[#333333] md:text-xl">by BEN STRAUSS</h3>
+          <h3 className="text-base tracking-[0.08em] text-[#333333] md:text-lg">by BEN STRAUSS</h3>
         </div>
         <div className="pointer-events-none absolute top-0 right-0 left-0 h-24 bg-gradient-to-b from-black/20 to-transparent" />
       </div>
 
-      <section className="relative z-10 mx-auto content-width -mt-34 px-4 pt-14 pb-4 md:-mt-48 md:px-6 md:pt-20 md:pb-8">
+      <section className="relative z-10 mx-auto content-width -mt-30 px-4 pt-14 pb-4 md:-mt-40 md:px-6 md:pt-20 md:pb-8">
         <h2 className="mb-8 text-2xl tracking-[0.08em] text-foreground/80 md:mb-10 md:text-4xl md:text-center">
           Motion Carries Structure
         </h2>
-        <div className="space-y-8 text-lg leading-9 text-foreground/80">
+        <div className="space-y-8 text-base leading-8 text-foreground/80 md:text-lg md:leading-9">
           <p>
             <strong>Pendulums</strong> is a physics-driven generative art system modeled after a Blackburn pendulum.
             Each artwork emerges from a unique configuration of forces including period ratios, amplitudes, damping,
@@ -122,7 +121,7 @@ export default function PendulumsPage() {
       </div>
 
       <article className="mx-auto content-width px-4 pt-0 pb-10 md:px-6 md:pb-12">
-        <div className="space-y-5 text-lg leading-8 text-foreground">
+        <div className="space-y-5 text-base leading-8 text-foreground md:text-lg">
           <h3 className="text-2xl tracking-[0.08em]">MOTION AS MEMORY</h3>
           <p>
             Motion is not just movement. It is memory and math. It is the quiet

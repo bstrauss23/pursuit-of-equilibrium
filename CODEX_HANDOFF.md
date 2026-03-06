@@ -8,15 +8,34 @@ Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
 - `Session Log` is reverse chronological history.
 - This file is project context, not a user request by itself.
 
-## Active Snapshot (latest)
+## Active Snapshot (as of 2026-03-06T23:59-07:00)
 - Landing `/`:
   - Split Lux/Pendulums doorway experience.
   - Header on landing shows centered POE logo/title only.
+  - Mobile pendulum overlay restored and redesigned:
+    - Two masked bobs (white top / black bottom) to mirror desktop color-split behavior.
+    - Oscillates around the exact center divider (shared doorway border).
+    - Mobile doorways forced to equal 50/50 heights with an explicit center divider line.
+- Lux `/lux`:
+  - Route now uses a dedicated dark visual treatment (neutral-charcoal, reduced blue cast, subtle top glow).
+  - Hero text stack now mirrors Pendulums hierarchy/placement:
+    - `Chapter 1`, `LUX`, subtitle, and `by BEN STRAUSS`.
+    - Same top-third anchored positioning and matching type scale conventions.
+  - Lux route forces `html/body` background color while mounted to prevent white overscroll reveal.
+  - Header and footer are route-aware dark mode on Lux.
+  - Lux header nav is intentionally reduced to `Lux` + `Pendulums` only (section-specific nav items deferred).
 - Pendulums `/pendulums`:
   - Hero + `Motion Carries Structure` section.
+  - Hero media switched from static image to iframe background (`/pendulums-hero-script.html`).
+  - Hero iframe/canvas behavior tuned for cover/crop, center alignment, and smoother masked fade.
+  - Hero iframe mount is deferred (idle/timeout) to reduce initial scroll freeze during heavy script startup.
+  - Hero title stack includes `Chapter 2` above `PENDULUMS` for chapter-style consistency with Lux.
+  - Hero text tone set to `#333333` for the title block copy.
+  - Added textured image backdrop layer behind iframe (`/temp-background-hero.jpg`).
   - `The System` section with seeded iframe + output profile.
   - `About Pendulums` section with full article from `ABOUT.md`.
   - Interview video is inside About flow (under `MOTION AS MEMORY`, before `FROM LIGHT TO CODE`).
+  - `#about` anchor now targets the About heading row (not article body) so heading stays in view on nav jump.
   - Tapered full-width section dividers between major sections.
 - Gallery `/pendulums/gallery`:
   - 512 metadata gallery with search/sort/trait filters, chips, lazy paging, modal.
@@ -26,6 +45,14 @@ Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
     - Listed-only price sort combobox (`high->low`, `low->high`).
   - Filters use shadcn `Drawer` (mobile bottom, desktop left).
   - Header style matches Playground (centered title + side lines + long description text).
+  - Added collector flow:
+    - `Generate my grid` section under Gallery intro text.
+    - Dialog with wallet/ENS input, on-demand fetch, preview grid, drag reorder, orientation swap, and PNG export.
+    - Export uses square tiles with no skew; long edge set to 4096 (`Save PNG (4K)`).
+  - Ownership fetch is no longer inferred from listings:
+    - Dedicated owner API route fetches held Pendulums by wallet.
+    - ENS input supported via server-side viem resolution and public RPC fallbacks.
+  - Added loading spinners to grid workflow actions/status (`Fetch Pendulums`, `Save PNG`, etc.).
 - Playground `/pendulums/playground`:
   - Intro header + description + iframe embed.
   - Iframe source is local: `/pendulum-playground-15.html`.
@@ -41,32 +68,91 @@ Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
 ## Open Risks / Verify Next
 1. Gallery modal animation iframe stability:
    - Historically intermittent p5 `getImageData ... width is 0` issue; wrapper fix exists but should be browser-verified.
-2. Gallery listed-only UX:
-   - Verify combobox spacing and no layout shift on toggle.
-3. Playground embed:
+2. Grid dialog drag UX:
+   - Verify drag ghost alignment/feel across Safari iOS + Android touch.
+3. Pendulums hero iframe performance/quality:
+   - Validate startup latency + texture quality tradeoff on lower-powered mobile devices.
+   - If residual jank remains, consider chunking p5 trace/texture generation over multiple frames.
+4. Landing mobile pendulum:
+   - Verify center-divider alignment and color split timing across different screen heights.
+5. Lux route dark theme:
+   - Verify no white flash/overscroll on iOS Safari and consistent dark header/footer colors after navigation.
+6. Playground embed:
    - Verify panel scroll works across desktop/mobile heights.
-4. Lint:
+7. Lint:
    - Non-blocking `@next/next/no-img-element` warnings remain in gallery intentionally.
 
 ## Key Files
 - `src/components/site-header.tsx`
 - `src/app/globals.css`
+- `src/components/landing-doorways.tsx`
+- `src/components/deferred-hero-iframe.tsx`
+- `src/app/lux/page.tsx`
 - `src/app/pendulums/page.tsx`
 - `src/components/pendulums-system-section.tsx`
 - `src/components/pendulums-gallery.tsx`
 - `src/app/pendulums/playground/page.tsx`
 - `public/pendulum-playground-15.html`
+- `public/pendulums-hero-script.html`
+- `public/temp-background-hero.jpg`
+- `public/temp-background-hero-light.jpg`
 - `src/app/api/listings/status/route.ts`
+- `src/app/api/owners/pendulums/route.ts`
+- `src/lib/ens.ts`
 - `src/lib/opensea.ts`
 - `public/data/pendulums_1-512.json`
 
 ## Env
 - `OPENSEA_API_KEY` (required)
 - `OPENSEA_COLLECTION_SLUG` (optional fallback)
+- `PUBLIC_MAINNET_RPC_URL` (optional; ENS resolution override for viem/public RPC flow)
 
 ## Session Log
 
-### 2026-03-05 (current)
+### 2026-03-06T23:59-07:00
+- Lux side kickoff / dark mode pass:
+  - Built Lux dark visual shell (darker neutral charcoal + subtler top light bleed; less blue).
+  - Made Lux header and footer route-aware dark variants.
+  - Trimmed Lux route nav to `Lux` + `Pendulums` only for now.
+  - Added Lux hero text stack matching Pendulums sizing/placement and added `by BEN STRAUSS`.
+  - Set Lux route `html/body` background color during mount to avoid white overscroll reveal.
+- Pendulums hero + performance polish:
+  - Removed side divider lines flanking `PENDULUMS`.
+  - Added `Chapter 2` above hero title with tuned spacing.
+  - Ensured hero title row remains centered after divider removal.
+  - Added deferred hero iframe mount component to mitigate page scroll freeze while p5 hero script initializes.
+- Typography/mobile polish:
+  - Applied mobile paragraph downshift pattern (`text-base md:text-lg`) across Pendulums content containers and related sections where `p` text used large defaults.
+- Landing mobile pendulum correction:
+  - Reworked motion and positioning to match centerline behavior; tightened oscillation range and enforced center border alignment.
+
+### 2026-03-05T18:00-07:00
+- Gallery collector/grid workflow:
+  - Added `Generate my grid` UI section and shadcn dialog flow.
+  - Added wallet/ENS input with on-demand fetch only.
+  - Added `Enter` submit behavior for wallet input.
+  - Added auto grid dimensioning + optional orientation swap (`AxB` <-> `BxA`).
+  - Added drag/touch tile reordering + damped drag ghost preview.
+  - Added 4K PNG export with square tiles, long-edge lock at 4096, and aspect-safe cover rendering.
+  - Added shadcn spinner affordances for loading states.
+- Ownership + ENS APIs:
+  - Added `/api/owners/pendulums` for wallet-held token IDs.
+  - Added viem-based ENS resolver with public RPC fallback chain.
+  - Added `ownerAddress` parsing in listing model for broader metadata completeness.
+- Pendulums hero:
+  - Replaced static hero image with iframe-based script background.
+  - Tuned iframe/script behavior for center alignment and cover-style crop.
+  - Introduced hero texture backdrop image (`temp-background-hero.jpg`) behind iframe.
+  - Smoothed hero mask fade with multi-stop gradient.
+  - Tuned hero script performance and removed legacy high-res download code path.
+  - Updated hero title block color to `#333333`.
+- Pendulums anchors/layout:
+  - Moved `#about` anchor target to heading row so heading lands in view after hash scroll.
+- Landing mobile animation:
+  - Restored mobile pendulum animation using two masked bobs (white/black split at center line).
+  - Enforced equal mobile doorway heights and explicit center divider alignment.
+
+### 2026-03-05T10:00-07:00
 - Clarified handoff purpose as Codex-to-Codex rolling summary.
 - Built/iterated OpenSea listing integration:
   - Server-side API + caching.

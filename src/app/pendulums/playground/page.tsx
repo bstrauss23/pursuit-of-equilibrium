@@ -7,7 +7,7 @@ export default function PendulumsPlaygroundPage() {
         <span className="h-[2px] w-16 bg-gradient-to-l from-transparent to-foreground/40 md:w-60" />
       </div>
 
-      <p className="mb-10 text-lg leading-8 text-foreground/80">
+      <p className="mb-10 text-base leading-8 text-foreground/80 md:text-lg">
         This is an interactive playground for exploring the Pendulums system. Use the control panel to dial in every
         parameter, from timing and amplitude to damping and line style, and build your own physical configurations.
         You can generate fully random systems, fine-tune them by hand, and watch each piece come to life in real

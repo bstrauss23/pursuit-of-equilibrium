@@ -825,7 +825,7 @@ export function PendulumsGallery() {
             <h1 className="text-3xl text-foreground/80 md:text-5xl">The Gallery</h1>
             <span className="h-[2px] w-16 bg-gradient-to-l from-transparent to-foreground/40 md:w-60" />
           </div>
-          <p className="mb-10 text-lg leading-8 text-foreground/80">
+          <p className="mb-10 text-base leading-8 text-foreground/80 md:text-lg">
             This gallery presents the complete Pendulums collection of 512 works. Use the filters to explore the
             system from different angles, sorting pieces by parameters such as period ratios, amplitudes, damping,
             cycle count, and more. Each artwork includes its full output profile, revealing the variables that shaped
