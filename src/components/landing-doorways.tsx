@@ -11,6 +11,21 @@ export function LandingDoorways() {
 
   return (
     <section className="relative -mx-4 -mt-8 -mb-8 h-[calc(100vh-4rem)] overflow-hidden md:-mx-6">
+      <div aria-hidden className="absolute inset-x-0 top-1/2 z-10 h-px -translate-y-1/2 bg-border md:hidden" />
+
+      <div className="pointer-events-none absolute inset-0 z-20 md:hidden">
+        <div className="doorway-mobile-pendulum-mask doorway-mobile-pendulum-mask-top">
+          <div className="doorway-mobile-pendulum">
+            <div className="doorway-mobile-pendulum-bob doorway-mobile-pendulum-bob-white" />
+          </div>
+        </div>
+        <div className="doorway-mobile-pendulum-mask doorway-mobile-pendulum-mask-bottom">
+          <div className="doorway-mobile-pendulum">
+            <div className="doorway-mobile-pendulum-bob doorway-mobile-pendulum-bob-black" />
+          </div>
+        </div>
+      </div>
+
       <div className="pointer-events-none absolute inset-0 z-20 hidden md:block">
         <div className="doorway-pendulum-mask doorway-pendulum-mask-lux">
           <div className="doorway-pendulum-anchor">
@@ -35,10 +50,10 @@ export function LandingDoorways() {
         </div>
       </div>
 
-      <div className="grid h-full grid-cols-1 md:grid-cols-2">
+      <div className="grid h-full grid-cols-1 grid-rows-2 md:grid-cols-2 md:grid-rows-1">
         <Link
           href="/lux"
-          className="group relative flex min-h-[50vh] items-center justify-center border-r-0 border-b border-border px-6 text-center transition md:min-h-0 md:border-r md:border-b-0"
+          className="group relative flex h-full min-h-0 items-center justify-center border-r-0 border-b-0 px-6 text-center transition md:border-r md:border-b-0"
         >
           <DoorwayImage
             src="/Lux-doorway.jpg"
@@ -58,7 +73,7 @@ export function LandingDoorways() {
 
         <Link
           href="/pendulums"
-          className="group relative flex min-h-[50vh] items-center justify-center px-6 text-center transition md:min-h-0"
+          className="group relative flex h-full min-h-0 items-center justify-center px-6 text-center transition"
         >
           <DoorwayImage
             src="/Pendulums-doorway.jpeg"

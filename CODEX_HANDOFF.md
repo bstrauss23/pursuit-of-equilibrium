@@ -2,106 +2,101 @@
 
 Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
 
-This file is a rolling handoff between Codex sessions so each new session can quickly understand recent work and continue smoothly.
-It is a project context summary, not a user request by itself.
+## How to use this doc
+- This is a rolling Codex-to-Codex handoff.
+- `Active Snapshot` is the current truth.
+- `Session Log` is reverse chronological history.
+- This file is project context, not a user request by itself.
 
-## Current state
-
+## Active Snapshot (latest)
 - Landing `/`:
   - Split Lux/Pendulums doorway experience.
-  - Pendulum animation hidden on mobile when doorways stack.
-  - Header on landing shows only centered POE logo/title (no nav links).
-
+  - Header on landing shows centered POE logo/title only.
 - Pendulums `/pendulums`:
-  - Hero with side lines around `PENDULUMS`.
-  - Added **The System** section directly under hero:
-    - Seeded iframe runner for `https://cdn.transientlabs.xyz/tlx/pendulums/Pendulums-23.html?seed=...`
-    - `Run the System` button at bottom of right panel.
-    - Right panel is `Output Profile` cards (Perfection, Style, Period, Amplitude, Damping, Cycle).
-    - Mobile Output Profile uses collapsible shadcn `Accordion` (starts collapsed).
-    - Mobile text in system section is centered.
-  - Added `About Pendulums` section header (matching system-style title lines).
-  - Interview video block below that header.
-  - Full About article content and figures implemented from `ABOUT.md`.
-  - Perfection tabs section implemented with shadcn Tabs.
-
+  - Hero + `Motion Carries Structure` section.
+  - `The System` section with seeded iframe + output profile.
+  - `About Pendulums` section with full article from `ABOUT.md`.
+  - Interview video is inside About flow (under `MOTION AS MEMORY`, before `FROM LIGHT TO CODE`).
+  - Tapered full-width section dividers between major sections.
 - Gallery `/pendulums/gallery`:
-  - React-native gallery rebuilt from reference HTML/JSON.
-  - 512 metadata loaded from `public/data/pendulums_1-512.json`.
-  - Search, sort, trait filters, applied filter chips, infinite/lazy paging.
-  - Clicking card opens item details modal.
-  - OpenSea listing integration:
-    - Green status dot on cards when token has an active listing.
-    - Modal OpenSea button now shows live list price when listed.
-    - Uses internal API routes (server-side key usage):
-      - `/api/listings/status?tokenIds=...`
-      - `/api/listings/[tokenId]`
-    - Shared OpenSea helper/caching in `src/lib/opensea.ts`.
-  - Filter controls now use shadcn `Drawer`:
-    - Mobile: bottom drawer
-    - Desktop: right-side drawer
-  - Active filter chips + `Clear all` shown near Filters button even when drawer closed.
-  - Mobile header layout for gallery changed so filter controls appear on their own row under title block.
-
-## Important files
-
+  - 512 metadata gallery with search/sort/trait filters, chips, lazy paging, modal.
+  - OpenSea snapshot integration:
+    - `Listed` badge with price on cards.
+    - `Only show Listed` toggle.
+    - Listed-only price sort combobox (`high->low`, `low->high`).
+  - Filters use shadcn `Drawer` (mobile bottom, desktop left).
+  - Header style matches Playground (centered title + side lines + long description text).
+- Playground `/pendulums/playground`:
+  - Intro header + description + iframe embed.
+  - Iframe source is local: `/pendulum-playground-15.html`.
+  - Embedded control panel is scrollable (CSS in local html).
+  - Width aligned with gallery (`max-w-[1600px]`).
 - Header/nav:
-  - `src/components/site-header.tsx`
+  - Order: Lux, Pendulums, Algorithm, About, The Gallery, Playground.
+  - Same-page hash links smooth-scroll.
+- Global layout tokens:
+  - `--content-max-width` + `.content-width`
+  - `--section-gap` + `.section-gap`
 
-- Landing:
-  - `src/components/landing-doorways.tsx`
+## Open Risks / Verify Next
+1. Gallery modal animation iframe stability:
+   - Historically intermittent p5 `getImageData ... width is 0` issue; wrapper fix exists but should be browser-verified.
+2. Gallery listed-only UX:
+   - Verify combobox spacing and no layout shift on toggle.
+3. Playground embed:
+   - Verify panel scroll works across desktop/mobile heights.
+4. Lint:
+   - Non-blocking `@next/next/no-img-element` warnings remain in gallery intentionally.
 
-- Pendulums page:
-  - `src/app/pendulums/page.tsx`
-  - `src/components/pendulums-system-section.tsx`
-  - `src/components/pendulums-interview-video.tsx`
+## Key Files
+- `src/components/site-header.tsx`
+- `src/app/globals.css`
+- `src/app/pendulums/page.tsx`
+- `src/components/pendulums-system-section.tsx`
+- `src/components/pendulums-gallery.tsx`
+- `src/app/pendulums/playground/page.tsx`
+- `public/pendulum-playground-15.html`
+- `src/app/api/listings/status/route.ts`
+- `src/lib/opensea.ts`
+- `public/data/pendulums_1-512.json`
 
-- Gallery:
-  - `src/app/pendulums/gallery/page.tsx`
-  - `src/components/pendulums-gallery.tsx`
-  - `src/app/api/listings/status/route.ts`
-  - `src/app/api/listings/[tokenId]/route.ts`
-  - `src/lib/opensea.ts`
+## Env
+- `OPENSEA_API_KEY` (required)
+- `OPENSEA_COLLECTION_SLUG` (optional fallback)
 
-- shadcn ui:
-  - `src/components/ui/dialog.tsx`
-  - `src/components/ui/drawer.tsx`
-  - `src/components/ui/accordion.tsx`
-  - `src/components/ui/tabs.tsx`
-  - `src/components/ui/button.tsx` (installed later; now used by dialog)
+## Session Log
 
-- Lint ignores:
-  - `eslint.config.mjs` (includes `reference-materials/**`)
+### 2026-03-05 (current)
+- Clarified handoff purpose as Codex-to-Codex rolling summary.
+- Built/iterated OpenSea listing integration:
+  - Server-side API + caching.
+  - Evolved from per-token fetches to collection snapshot strategy for reliability.
+  - Removed per-token listing API route from active flow.
+- Gallery updates:
+  - Added listed indicator then converted to `Listed` badge with price.
+  - Added `Only show Listed`.
+  - Added listed-only shadcn combobox price sorting.
+  - Header restyle + control row adjustments.
+  - Filters drawer moved to desktop-left.
+- Pendulums page layout updates:
+  - Added `Motion Carries Structure` section and iterated placement.
+  - Standardized widths via global `.content-width`.
+  - Added global section gap utility and tapered dividers.
+  - Moved interview video into About article flow.
+- Playground:
+  - Added `/pendulums/playground` route.
+  - Tried native React playground, then intentionally scrapped.
+  - Final approach: iframe embed + intro text.
+  - Switched iframe to local `/pendulum-playground-15.html`.
+  - Added scrollable control panel behavior inside embedded HTML.
+- Header/nav:
+  - Nav order updates.
+  - Smooth-scroll for same-page hash links.
+- Housekeeping:
+  - Removed unused `children` param in `src/components/ui/combobox.tsx`.
 
-## Reference assets
-
-- `reference-materials/` contains:
-  - `webflow-side-system.html`
-  - `the-system.html`
-  - `pendulum-gallery-17.html`
-  - original `pendulums_1-512.json`
-
-- Runtime gallery json used by app:
-  - `public/data/pendulums_1-512.json`
-
-## Known issue to verify first next session
-
-- After switching gallery modal to shadcn `Dialog`, p5 iframe had an intermittent error:
-  - `IndexSizeError: getImageData ... source width is 0`
-- A stabilization fix was applied (fixed-size media wrapper before iframe mount), but needs real-browser verification across several animated tokens.
-
-## Remaining non-blocking lint warnings
-
-- `src/components/pendulums-gallery.tsx` has `@next/next/no-img-element` warnings (using `<img>` intentionally for external IPFS/media behavior).
-
-## Suggested first checks for next Codex
-
-1. Run app and verify:
-   - Gallery card modal animation iframe reliability (no p5 width=0 errors).
-   - OpenSea dots reflect listing status and modal price text renders correctly.
-   - Filters drawer UX on desktop and mobile.
-   - System metadata fields all populate each run.
-2. Ensure env is present for listing endpoints:
-   - `OPENSEA_API_KEY` (required)
-   - `OPENSEA_COLLECTION_SLUG` (optional fallback if contract lookup cannot resolve slug)
-3. If desired, convert gallery images to `next/image` with proper remote patterns in `next.config.ts`.
+### Pre-2026-03-05
+- Existing core work already in place:
+  - Landing doorway experience.
+  - Pendulums system/about/perfection sections.
+  - Gallery rebuild from reference metadata/html.

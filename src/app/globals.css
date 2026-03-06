@@ -82,6 +82,7 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+  --button-hover-bg: oklch(0.95 0.003 286.2);
 }
 
 @layer utilities {
@@ -127,6 +128,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+  --button-hover-bg: oklch(0.3 0.007 286.1);
 }
 
 @layer base {
@@ -145,6 +147,15 @@
   h5,
   h6 {
     font-family: var(--font-ibm-plex-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease;
+  }
+
+  button:not(:disabled):hover {
+    background-color: var(--button-hover-bg) !important;
   }
 }
 
@@ -221,4 +232,55 @@
 .doorway-pendulum-black .doorway-pendulum-rod,
 .doorway-pendulum-black .doorway-pendulum-bob {
   background: rgba(0, 0, 0);
+}
+
+.doorway-mobile-pendulum-mask {
+  position: absolute;
+  inset: 0;
+}
+
+.doorway-mobile-pendulum-mask-top {
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+}
+
+.doorway-mobile-pendulum-mask-bottom {
+  clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+}
+
+.doorway-mobile-pendulum {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 64px;
+  height: 64px;
+  transform: translate(-50%, -50%);
+  animation: doorway-mobile-pendulum-travel 8s ease-in-out infinite;
+  will-change: top;
+}
+
+.doorway-mobile-pendulum-bob {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+}
+
+.doorway-mobile-pendulum-bob-white {
+  background: rgba(255, 250, 240);
+}
+
+.doorway-mobile-pendulum-bob-black {
+  background: rgba(0, 0, 0);
+}
+
+@keyframes doorway-mobile-pendulum-travel {
+  0% {
+    top: 38%;
+  }
+  50% {
+    top: 62%;
+  }
+  100% {
+    top: 38%;
+  }
 }

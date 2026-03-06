@@ -1,14 +1,14 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pursuit of Code</title>
+    <title>Pendulums</title>
     <style>
         body {
             margin: 0px;
             padding: 0px;
-            display: flex;
             overflow: hidden;
         }
 
@@ -30,24 +30,11 @@
             height: auto;
             margin: auto;
         }
-
-        #perfection-score {
-            position: absolute;
-            font-size: 1rem;
-            font-family: "Roboto";
-            color: rgb(59, 59, 59);
-            align-self: baseline;
-            bottom: 20px;
-            display: none;
-        }
     </style>
 </head>
 
 <body>
     <div id="frame">
-        <p id="perfection-score">System Rating: <b>Notable</b></p>
-        <canvas id="defaultCanvas0" class="p5Canvas" width="1880" height="1880"
-            style="width: 940px; height: 940px;"></canvas>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
     <script>
@@ -70,7 +57,6 @@
         let animateDrawingFirst = true;
         let clickState = animateDrawing ? 0 : 1; // Initialize what state the piece is in (animated verses static)
 
-        let startTime = 0; // Initialize start time
         let runtime; // Total time a drawing takes to complete
         let periodRatios; // Array of possible period rations (periodX / periodY)
         let periodRatiosObj; // Object to map period ratios to their respective strings
@@ -96,11 +82,11 @@
         let scaledValue; // Scaled average of the two damping percentiles 
         let lineType, lineTypes; // beginShape() type that results in either a solid line or dashed line
         let particles = []; // Array to hold the particles
-        let particleSize;
         let traceForward = true;
         let seedValue;
         let maxCycleCount;
         let lineTypeString;
+
 
         //////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +107,7 @@
             randomSeed(seedValue);
 
             // Canvas setup //
-            canvasSize = min(windowWidth, windowHeight)
+            canvasSize = min(windowWidth, windowHeight);
             let canvas = createCanvas(canvasSize, canvasSize);
             canvas.parent('frame');
             frameRate(fps);
@@ -182,84 +168,25 @@
             let lightModeRand = random(1);
             let colorRand = random(1);
             let strokeColorRand = random(1);
-            if (lightModeRand < 0.5) {
-                mode = "Dark";
-                if (colorRand < 0.7) {
-                    colorTheme = "None"
-                    colorRed = 22;
-                    colorGreen = 22;
-                    colorBlue = 22;
-                } else if (colorRand >= 0.7 && colorRand < 0.8) {
-                    colorTheme = "Deep Grove"
-                    colorRed = 28 * 0.75;
-                    colorGreen = 48 * 0.75;
-                    colorBlue = 35 * 0.75;
-                } else if (colorRand >= 0.8 && colorRand < 0.9) {
-                    colorTheme = "Slate Horizon"
-                    colorRed = 27 * 0.75;
-                    colorGreen = 46 * 0.75;
-                    colorBlue = 74 * 0.75;
-                } else {
-                    colorTheme = "Iron Ember"
-                    colorRed = 76 * 0.75;
-                    colorGreen = 30 * 0.75;
-                    colorBlue = 30 * 0.75;
-                }
-                strokeColorRed = 255;
-                strokeColorGreen = 250;
-                strokeColorBlue = 240;
-                strokeAlpha = 245;
-                exposureThreshold = 0.6;
-                if (lineType === POINTS) {
-                    strokeSize = 1.5;
-                }
-            } else {
-                mode = "Light";
-                if (colorRand < 0.7) {
-                    colorTheme = "None"
-                    strokeColorRed = 48; // Charcoal
-                    strokeColorGreen = 46;
-                    strokeColorBlue = 40;
-                } else if (colorRand >= 0.7 && colorRand < 0.8) {
-                    colorTheme = "Deep Grove"
-                    strokeColorRed = 28;
-                    strokeColorGreen = 48;
-                    strokeColorBlue = 35;
-                } else if (colorRand >= 0.8 && colorRand < 0.9) {
-                    colorTheme = "Slate Horizon"
-                    strokeColorRed = 27;
-                    strokeColorGreen = 46;
-                    strokeColorBlue = 74;
-                } else {
-                    colorTheme = "Iron Ember"
-                    strokeColorRed = 76;
-                    strokeColorGreen = 30;
-                    strokeColorBlue = 30;
-                }
-                colorRed = 255;
-                colorGreen = 250;
-                colorBlue = 240;
-                strokeAlpha = 240;
-                exposureThreshold = 0.15;
-                if (lineType === POINTS) {
-                    strokeSize = 2;
-                }
-            }
+            mode = "Light";
+            colorTheme = "None"
+            strokeColorRed = 48;
+            strokeColorGreen = 46;
+            strokeColorBlue = 40;
+            colorRed = 255;
+            colorGreen = 250;
+            colorBlue = 240;
+            strokeAlpha = 240;
+            exposureThreshold = 0.15;
 
             // Determine x and y amplitudes //
             let minAmp = canvasSize / 10;
             let guaranteedAmpMin = canvasSize / 5;
             let guaranteedAmpMax = canvasSize / 2.25;
 
-            if (random() < 0.5) {
-                // Ensure X is larger
-                amplitudeX = randomIncrement(guaranteedAmpMin, guaranteedAmpMax, 1);
-                amplitudeY = randomIncrement(minAmp, guaranteedAmpMax, 1);
-            } else {
-                // Ensure Y is larger
-                amplitudeY = randomIncrement(guaranteedAmpMin, guaranteedAmpMax, 1);
-                amplitudeX = randomIncrement(minAmp, guaranteedAmpMax, 1);
-            }
+            // Bias towards X being larger
+            amplitudeX = randomIncrement(guaranteedAmpMin, guaranteedAmpMax, 1);
+            amplitudeY = randomIncrement(minAmp, guaranteedAmpMax, 1);
 
             aspectRatio = amplitudeX / amplitudeY;
             if (aspectRatio > 1) {
@@ -302,8 +229,6 @@
             // Determine damping coefficients //
             minDampingX = roundToEightDecimalPlaces(dampingCoefficient(periodX));
             minDampingY = roundToEightDecimalPlaces(dampingCoefficient(periodY));
-            // dampingX = randomIncrement(minDampingX, 1, 0.000001);
-            // dampingY = randomIncrement(minDampingY, 1, 0.000001);
             dampingX = randomIncrement(0.9998, 1, 0.000001);
             dampingY = randomIncrement(0.9998, 1, 0.000001);
             if (dampingX === 1 && dampingY === 1) {
@@ -328,7 +253,6 @@
 
             // Determine cycle count //
             maxCycleCount = max(150, min(dampingPercentileX, dampingPercentileY) * 500);
-            // console.log(`maxCycleCount: ${maxCycleCount}`);
             cycleCount = randomIncrement(10, maxCycleCount, 1);
 
             // Calculate the animation runtime (exposure time) //
@@ -346,14 +270,7 @@
             let periodOffsetReduction = 5 * pow(1 * (periodOffset / 0.01), 3);
             let cycleCountReduction = 10 * pow(1 - (cycleCount / maxCycleCount), 10);
 
-            // console.log(`LCM Reduction: ${lcmReduction}`);
-            // console.log(`Aspect Ratio Reduction: ${aspectRatioReduction}`);
-            // console.log(`Scale Reduction: ${scaleReduction}`);
-            // console.log(`Period Offset Reduction: ${periodOffsetReduction}`);
-            // console.log(`Cycle Count Reduction: ${cycleCountReduction}`);
-
             // Bonus Points for period ratios with LCM < 7 //
-
             if (lcm <= 6) {
                 bonusPoints = (100 - scaledValue) * ((7 - (lcm + (1 / lcm))) / 10);
             } else {
@@ -401,8 +318,6 @@
             if (!animateDrawing) {
                 drawTrace();
             }
-
-            printParameters()
         }
 
 
@@ -414,16 +329,6 @@
         // BEGIN FUNCTIONS
         // =====================
 
-        // Function to convert string to hash for random seeding
-        function stringToHash(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash |= 0; // Convert to 32bit integer
-            }
-            return hash;
-        }
 
         /////////////////////////////////////////////////////////////////////////
 
@@ -436,7 +341,6 @@
 
         // Function to calculate minimum damping coefficient, calculated as a function of the period and linearly interpolated
         function dampingCoefficient(p) {
-            // console.log(`p value: ${p}`);
             // Define the known period lengths and their corresponding damping coefficients, following the power of 2's
             let periods = [1, 2, 4, 8, 16];
             let coefficients = [0.99925, 0.999625, 0.9998125, 0.99990625, 0.999953125];
@@ -460,87 +364,6 @@
                 }
             }
         };
-
-        /////////////////////////////////////////////////////////////////////////
-
-        // Function to bin the damping and amplitude values
-        function binDamping(value) {
-            if (value >= 0.999999) return "None";
-            if (value >= 0.999990) return "Minimal";
-            if (value >= 0.999970) return "Very Low";
-            if (value >= 0.999940) return "Low";
-            if (value >= 0.999900) return "Medium";
-            if (value >= 0.999850) return "High";
-            return "Very High";
-        }
-
-        function binAmplitude(value, canvasSize) {
-            const min = canvasSize / 10;
-            const max = canvasSize / 2.25;
-
-            const normalized = (value - min) / (max - min); // range: 0 to 1
-            const bin = Math.round(normalized * 9) + 1; // scale to 1–10
-            const clamped = Math.max(1, Math.min(10, bin)); // clamp result
-            return `${clamped}/10`; // format as string
-        }
-
-        function binPeriodOffset(value) {
-            if (value == 0) return "None";
-            if (value > 0 && value <= 0.002) return "Very Low";
-            if (value > 0.002 && value <= 0.004) return "Low";
-            if (value > 0.004 && value <= 0.006) return "Medium";
-            if (value > 0.006 && value <= 0.008) return "High";
-            return "Very High";
-        }
-
-        /////////////////////////////////////////////////////////////////////////
-
-        // Function to print out various parameters in the console
-        function printParameters() {
-            // console.log(`Mode: ${mode}`);
-            // console.log(`System: ${systemRating}`);
-            // console.log(`Perfection score: ${perfectionScore}`);
-            document.getElementById("perfection-score").innerHTML = `System Rating: <b>${systemRating}</b>`;
-
-            // //For testing
-            // console.log(`Color Theme: ${colorTheme}`);
-            // console.log(`Adjusted Score: ${adjustedScore}`);
-            // console.log(`Bonus points: ${bonusPoints}`);
-            // console.log(`lcm: ${lcm}`);
-            // console.log(`scaledValue: ${scaledValue}`)
-            // console.log(`Percentile X: ${dampingPercentileX}`);
-            // console.log(`Percentile Y: ${dampingPercentileY}`);
-            // console.log(`Period ratio: ${periodRatioString}`);
-            // console.log(`Run time: ${runtime}s`);
-            // console.log(`X-period: ${periodX}s`);
-            // console.log(`Y-period: ${periodY}s`);
-            // console.log(`Period Offset: ${periodOffset}s`);
-            // console.log(`X-amplitude: ${amplitudeX.toFixed(1)}`);
-            // console.log(`Y-amplitude: ${amplitudeY.toFixed(1)}`);
-            // console.log(`X-damping: ${dampingX}`);
-            // console.log(`Y-damping: ${dampingY}`);
-            // console.log(`X-phase offset: ${phaseOffsetStringX}`);
-            // console.log(`Y-phase offset: ${phaseOffsetStringY}`);
-            // console.log(`cycleCount: ${cycleCount}`);
-
-            // Post messages to parent window
-            const dataToSend = {
-                systemRating,
-                perfectionScore,
-                lightMode: `${mode} Mode`,
-                lineTypeString,
-                colorTheme,
-                periodRatioString,
-                periodOffset: binPeriodOffset(periodOffset),
-                amplitudeX: binAmplitude(amplitudeX, canvasSize),
-                amplitudeY: binAmplitude(amplitudeY, canvasSize),
-                dampingX: binDamping(dampingX),
-                dampingY: binDamping(dampingY),
-                cycleCount,
-                runtime,
-            };
-            window.parent.postMessage(dataToSend, '*');
-        }
 
         /////////////////////////////////////////////////////////////////////////
 
@@ -621,7 +444,7 @@
             let d = pencilTexture.pixelDensity();
             for (let y = 0; y < pencilTexture.height * d; y++) {
                 for (let x = 0; x < pencilTexture.width * d; x++) {
-                    let index = (x + y * pencilTexture.width * d) * 4; // Correct index calculation
+                    let index = (x + y * pencilTexture.width * d) * 4;
 
                     // Determine the alpha value based on probability
                     let alpha;
@@ -685,7 +508,6 @@
 
                 traceAnimation.push(createVector(x, y));
 
-                // no easing zones, no dt adjustments
                 t += dt;
             }
         }
@@ -810,7 +632,8 @@
                 animateDrawing = true;
                 draw();
             }
-            return false; // Prevent default behavior
+            animateDrawingFirst = false;
+            return false;
         }
 
 
@@ -829,7 +652,7 @@
             let d = paperTextureHighRes.pixelDensity();
             for (let y = 0; y < paperTextureHighRes.height * d; y++) {
                 for (let x = 0; x < paperTextureHighRes.width * d; x++) {
-                    let index = (x + y * paperTextureHighRes.width * d) * 4; // Correct index calculation
+                    let index = (x + y * paperTextureHighRes.width * d) * 4;
                     exposure = random(1);
 
                     // Determine the alpha value based on brightness and probability
@@ -862,7 +685,7 @@
             let d = pencilTextureHighRes.pixelDensity();
             for (let y = 0; y < pencilTextureHighRes.height * d; y++) {
                 for (let x = 0; x < pencilTextureHighRes.width * d; x++) {
-                    let index = (x + y * pencilTextureHighRes.width * d) * 4; // Correct index calculation
+                    let index = (x + y * pencilTextureHighRes.width * d) * 4;
 
                     // Determine the alpha value based on probability
                     let alpha;
@@ -897,7 +720,6 @@
             // Adjusted size parameters for high-res drawing
             let scaleRatio = highResCanvasSize / canvasSize; // Calculate scale ratio
 
-            // Example drawing logic, scaled for high resolution
             if (lineType === null) {
                 gfx.beginShape();
             } else {
@@ -958,65 +780,6 @@
                 return false;
             }
         }
-
-        /////////////////////////////////////////////////////////////////////////
-
-        // Function to capture canvas and send to parent
-
-        const allowedOrigins = [
-            "https://www.pursuitofequilibrium.com",
-            "https://bendulums.webflow.io"
-        ];
-
-        let lastVerifiedOrigin = null;
-
-        // Listen for a request from parent to grab the canvas
-        window.addEventListener("message", (event) => {
-            if (!allowedOrigins.includes(event.origin)) {
-                console.warn(`Blocked message from untrusted origin: ${event.origin}`);
-                return;
-            }
-
-            console.log(`✅ Verified message from: ${event.origin}`);
-
-            if (event.data?.type === "download-canvas") {
-                lastVerifiedOrigin = event.origin;
-                console.log(`Last verified origin: ${lastVerifiedOrigin}`);
-                if (typeof window.downloadCurrentCanvas === "function") {
-                    window.downloadCurrentCanvas();
-                }
-            }
-        });
-
-        // Function to capture canvas and send to parent
-        window.downloadCurrentCanvas = function () {
-            const canvas = document.querySelector("canvas");
-            if (!canvas) {
-                console.error("Canvas not found.");
-                return;
-            }
-
-            canvas.toBlob((blob) => {
-                if (!blob) {
-                    console.error("Failed to convert canvas to blob.");
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    if (!lastVerifiedOrigin) {
-                        console.error("No verified origin to send canvas to.");
-                        return;
-                    }
-
-                    window.parent.postMessage({
-                        type: "canvas-image",
-                        dataUrl: reader.result,
-                    }, lastVerifiedOrigin);
-                };
-                reader.readAsDataURL(blob);
-            }, "image/png");
-        };
     </script>
 </body>
 

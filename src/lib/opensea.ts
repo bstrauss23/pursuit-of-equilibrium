@@ -27,6 +27,7 @@ export type ListingStatus = {
   rawPrice: string | null;
   displayPrice: string | null;
   currency: string | null;
+  ownerAddress: string | null;
   fetchedAt: string;
 };
 
@@ -99,6 +100,7 @@ function defaultNotListed(): ListingStatus {
     rawPrice: null,
     displayPrice: null,
     currency: null,
+    ownerAddress: null,
     fetchedAt: new Date().toISOString(),
   };
 }
@@ -254,6 +256,21 @@ function extractTokenIdFromListing(listing: Record<string, unknown>) {
   return null;
 }
 
+function extractOwnerAddressFromListing(listing: Record<string, unknown>) {
+  const maker = asRecord(listing.maker);
+  const fromAccount = asRecord(listing.from_account);
+  const protocolData = asRecord(listing.protocol_data);
+  const parameters = asRecord(protocolData?.parameters);
+
+  return (
+    trimHexAddress(maker?.address) ??
+    trimHexAddress(listing.maker) ??
+    trimHexAddress(fromAccount?.address) ??
+    trimHexAddress(parameters?.offerer) ??
+    null
+  );
+}
+
 export function getContractAddress() {
   return OPENSEA_CONTRACT;
 }
@@ -292,6 +309,7 @@ export async function getCollectionActiveListings(): Promise<{
       rawPrice: parsedPrice.rawPrice,
       displayPrice: parsedPrice.displayPrice,
       currency: parsedPrice.currency,
+      ownerAddress: extractOwnerAddressFromListing(listing),
       fetchedAt,
     };
 
@@ -343,11 +361,64 @@ export async function getBestListingStatus(tokenId: number): Promise<ListingStat
     rawPrice: parsedPrice.rawPrice,
     displayPrice: parsedPrice.displayPrice,
     currency: parsedPrice.currency,
+    ownerAddress: extractOwnerAddressFromListing(listing),
     fetchedAt: new Date().toISOString(),
   };
 
   tokenCache.set(tokenId, { data: result, expiresAt: now + TOKEN_CACHE_TTL_MS });
   return result;
+}
+
+export async function getOwnedPendulumTokenIds(walletAddress: string): Promise<{
+  fetchedAt: string;
+  tokenIds: number[];
+}> {
+  const normalizedWallet = trimHexAddress(walletAddress);
+  if (!normalizedWallet || !/^0x[a-f0-9]{40}$/.test(normalizedWallet)) {
+    throw new Error("Invalid wallet address.");
+  }
+
+  const slug = await resolveCollectionSlug();
+  const tokenIds = new Set<number>();
+  let nextCursor: string | null = null;
+
+  for (let page = 0; page < 20; page += 1) {
+    const params = new URLSearchParams({
+      limit: "200",
+      collection: slug,
+    });
+    if (nextCursor) {
+      params.set("next", nextCursor);
+    }
+
+    const payload = await openSeaFetch(`/chain/${OPENSEA_CHAIN}/account/${normalizedWallet}/nfts?${params.toString()}`);
+    const root = asRecord(payload) ?? {};
+    const nfts = Array.isArray(root.nfts) ? root.nfts : [];
+
+    for (const rawNft of nfts) {
+      const nft = asRecord(rawNft);
+      if (!nft) continue;
+
+      const identifier = readString(nft.identifier) ?? readString(nft.token_id);
+      if (!identifier || !/^\d+$/.test(identifier)) continue;
+
+      const tokenId = Number(identifier);
+      if (Number.isInteger(tokenId) && tokenId > 0) {
+        tokenIds.add(tokenId);
+      }
+    }
+
+    const next = readString(root.next) ?? readString(root.next_cursor);
+    if (!next || next === nextCursor) {
+      break;
+    }
+    nextCursor = next;
+  }
+
+  return {
+    fetchedAt: new Date().toISOString(),
+    tokenIds: Array.from(tokenIds).sort((a, b) => a - b),
+  };
 }
 
 export async function mapWithConcurrency<T, R>(
