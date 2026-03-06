@@ -13,12 +13,17 @@ const defaultNavItems = [
   { href: "/pendulums/gallery", label: "The Gallery" },
   { href: "/pendulums/playground", label: "Playground" },
 ];
+const luxNavItems = [
+  { href: "/lux", label: "Lux" },
+  { href: "/pendulums", label: "Pendulums" },
+  { href: "/lux#about", label: "About" },
+];
 
 export function SiteHeader() {
   const pathname = usePathname();
   const showNav = pathname !== "/";
   const isLuxRoute = pathname.startsWith("/lux");
-  const navItems = isLuxRoute ? defaultNavItems.slice(0, 2) : defaultNavItems;
+  const navItems = isLuxRoute ? luxNavItems : defaultNavItems;
   const [hash, setHash] = useState("");
 
   useEffect(() => {

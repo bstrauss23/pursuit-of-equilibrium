@@ -115,6 +115,7 @@ Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
 - `src/lib/ens.ts`
 - `src/lib/opensea.ts`
 - `public/data/pendulums_1-512.json`
+- `http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/`
 
 ## Env
 - `OPENSEA_API_KEY` (required)

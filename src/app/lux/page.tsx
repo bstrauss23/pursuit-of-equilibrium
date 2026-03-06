@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { type SyntheticEvent, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { LuxAtmosphericDust } from "@/components/lux-atmospheric-dust";
 
 import luxData from "../../../public/data/lux.json";
 
@@ -226,6 +227,7 @@ export default function LuxPage() {
             "radial-gradient(ellipse at center, rgba(255,247,235,0.18) 0%, rgba(245,236,222,0.10) 34%, rgba(210,198,180,0.04) 56%, rgba(200,188,172,0) 74%)",
         }}
       />
+      <LuxAtmosphericDust />
 
       <div className="relative mx-auto flex w-full max-w-[1700px] flex-col items-center px-4 pt-24 pb-16 md:px-8 md:pt-32 md:pb-24">
         <div className="mb-24 flex flex-col items-center gap-4 text-center md:mb-32 md:gap-6">
@@ -240,7 +242,7 @@ export default function LuxPage() {
         </div>
 
         <div className="w-full max-w-[1400px] md:hidden">
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
             {luxItems.map((item) => (
               <LuxCard
                 key={`sm-${item.name}`}
@@ -283,11 +285,121 @@ export default function LuxPage() {
           <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-100/35 to-transparent" />
         </div>
 
-        <div id="about" className="flex w-full items-center justify-center gap-4 md:gap-6">
+        <div id="about" className="scroll-mt-28 mb-12 flex w-full items-center justify-center gap-4 md:mb-16 md:gap-6">
           <span className="h-[2px] w-16 bg-gradient-to-r from-transparent to-zinc-100/45 md:w-60" />
           <h2 className="text-3xl text-zinc-100/90 md:text-5xl">About Lux</h2>
           <span className="h-[2px] w-16 bg-gradient-to-l from-transparent to-zinc-100/45 md:w-60" />
         </div>
+
+        <article className="mx-auto content-width px-4 pt-0 pb-10 md:px-6 md:pb-12">
+          <div className="space-y-5 text-base leading-8 text-zinc-200 md:text-lg">
+            <p>Before code entered the story, there was light.</p>
+            <p>
+              Lux is the first chapter of Pursuit of Equilibrium, a body of work exploring how physical systems move
+              toward balance. The artworks in Lux are not digital simulations. They are long-exposure photographs
+              created using real pendulums swinging in darkness.
+            </p>
+            <p>
+              A programmable RGB light attached to the pendulum traces its motion through space. Over time, the camera
+              records this path, revealing geometric structures normally invisible to the human eye.
+            </p>
+            <p>What appears as a drawing is actually the trace of a real physical system moving toward equilibrium.</p>
+
+            <h3 className="pt-8 text-2xl tracking-[0.08em]">MAKING MOTION VISIBLE</h3>
+            <p>
+              Pendulums are among the simplest systems in physics. A suspended mass naturally swings under the
+              influence of gravity, gradually losing energy as it settles toward rest.
+            </p>
+            <p>
+              By attaching light to the moving mass and capturing the motion with long exposure photography, the path
+              of the pendulum becomes visible.
+            </p>
+            <p>
+              These shapes are known as Lissajous curves, patterns created when motion occurs along two axes with
+              different oscillation periods.
+            </p>
+            <p>Lux was an attempt to capture these hidden patterns directly from the physical world.</p>
+
+            <h3 className="pt-8 text-2xl tracking-[0.08em]">FROM SIMPLE PENDULUM TO BLACKBURN PENDULUM</h3>
+            <p>The earliest Lux experiments were improvised.</p>
+            <p>
+              The first pendulum rig was assembled from little more than string, duct tape, and a flashlight suspended
+              above a camera in a dark room.
+            </p>
+            <p>
+              Lux No. 1 was created using this simple pendulum configuration. In a simple pendulum, the mass swings
+              with the same period in every direction, producing elegant but limited structures.
+            </p>
+            <p>To explore more complex motion, the system evolved into a Blackburn pendulum.</p>
+            <p>
+              A Blackburn pendulum introduces two different effective lengths depending on the direction of motion.
+              Each axis swings with a slightly different period, causing the motions to interfere and generate
+              intricate geometric paths.
+            </p>
+
+            <h3 className="pt-8 text-2xl tracking-[0.08em]">BUILDING THE RIG</h3>
+            <p>As the experiments progressed, the pendulum system became increasingly refined.</p>
+            <p>
+              The original string setup made precise tuning difficult. Small adjustments dramatically changed the
+              resulting patterns.
+            </p>
+            <p>
+              The system was eventually rebuilt using lightweight structural components, hinges, and turnbuckles.
+              These allowed pendulum lengths to be adjusted with millimeter precision.
+            </p>
+            <p>
+              At the end of the pendulum hung a weighted mass containing a programmable RGB flashlight. The entire
+              system was suspended above a camera inside a completely dark room.
+            </p>
+            <p>
+              Many of the final photographs were captured inside a small blacked-out bedroom using a Canon 5D Mark IV
+              set for long exposure.
+            </p>
+            <p>
+              Exposure times varied depending on the motion of the system. Some lasted less than a minute, while
+              others captured several minutes as the pendulum gradually lost energy.
+            </p>
+
+            <h3 className="pt-8 text-2xl tracking-[0.08em]">THE LUX COLLECTION</h3>
+            <p>Hundreds of exposures were captured during these experiments.</p>
+            <p>From this body of work, seven pieces were selected as the official Lux collection.</p>
+            <p>
+              Each work is titled sequentially from Lux No. 1 through Lux No. 7 and was released as a one-of-one
+              auction beginning with a zero ETH reserve.
+            </p>
+            <p>
+              Although the images appear graphical, they are not drawn by hand or generated by software. Each piece is
+              the direct result of a physical pendulum system moving through space.
+            </p>
+            <p>The geometry is produced by gravity itself.</p>
+
+            <h3 className="pt-8 text-2xl tracking-[0.08em]">THE SEEKER&apos;S COLLECTION</h3>
+            <p>Each Lux auction also included a participation element.</p>
+            <p>
+              Every unique bidder received a special edition artwork known as a Seeker&apos;s piece, forming a separate
+              collection called The Seeker&apos;s Collection.
+            </p>
+            <p>Four Lux auctions included Seeker editions:</p>
+            <p>
+              Tempus
+              <br />
+              Motu
+              <br />
+              Clepsydra
+              <br />
+              Kinesis
+            </p>
+            <p>
+              Some of these pieces incorporated puzzles or interactive elements designed to reward curiosity and
+              exploration.
+            </p>
+
+            <h3 className="pt-8 text-2xl tracking-[0.08em]">A BEGINNING</h3>
+            <p>Lux began as a simple pendulum experiment in a dark room.</p>
+            <p>In building tools to understand and preview these systems, a new medium began to emerge.</p>
+            <p>That evolution became Chapter II: Pendulums.</p>
+          </div>
+        </article>
 
         <Dialog
           open={Boolean(activeItem)}
@@ -299,7 +411,7 @@ export default function LuxPage() {
         >
           <DialogContent
             showCloseButton={false}
-            className="max-h-[90vh] w-full max-w-7xl overflow-hidden border border-zinc-700 bg-[#17181b] p-4 text-zinc-100 shadow-[0_4px_20px_#0008] sm:max-w-7xl"
+            className="max-h-[90vh] w-full max-w-7xl overflow-y-auto md:overflow-hidden border border-zinc-700 bg-[#17181b] p-4 text-zinc-100 shadow-[0_4px_20px_#0008] sm:max-w-7xl"
           >
             {activeItem ? (
               <>
@@ -325,6 +437,10 @@ export default function LuxPage() {
                     <DialogDescription className="mb-4 text-sm leading-7 text-zinc-300 md:text-base">
                       {activeItem.description ?? "No description available."}
                     </DialogDescription>
+
+                    <p className="mb-4 text-sm text-zinc-400 italic">
+                      For secondary acquisition inquiries, please inquire directly.
+                    </p>
 
                     <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
                       <h4 className="mb-3 text-xs tracking-[0.2em] text-zinc-400 uppercase">Attributes</h4>
