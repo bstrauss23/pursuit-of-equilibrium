@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
         hostname: "arweave.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.transientlabs.xyz",
+        pathname: "/**",
+      },
     ],
   },
 };

@@ -13,7 +13,7 @@ export function DeferredHeroIframe({ className, src, title }: DeferredHeroIframe
 
   useEffect(() => {
     let cancelled = false;
-    let timeoutId: number | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const start = () => {
       if (cancelled) return;
@@ -28,11 +28,11 @@ export function DeferredHeroIframe({ className, src, title }: DeferredHeroIframe
       };
     }
 
-    timeoutId = window.setTimeout(start, 450);
+    timeoutId = setTimeout(start, 450);
     return () => {
       cancelled = true;
       if (timeoutId !== null) {
-        window.clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
       }
     };
   }, []);
@@ -41,4 +41,3 @@ export function DeferredHeroIframe({ className, src, title }: DeferredHeroIframe
 
   return <iframe src={src} title={title} className={className} loading="eager" tabIndex={-1} />;
 }
-

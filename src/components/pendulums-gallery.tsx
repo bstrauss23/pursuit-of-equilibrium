@@ -1,7 +1,7 @@
 "use client";
 
 import { type SyntheticEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
+import NextImage from "next/image";
 import { createPortal } from "react-dom";
 import {
   Drawer,
@@ -1015,7 +1015,7 @@ export function PendulumsGallery() {
                       className="overflow-hidden border border-border bg-[#fffcf7] text-left shadow-[0_2px_5px_#0003] transition-transform hover:scale-[1.02]"
                     >
                       <div className="relative aspect-square w-full bg-background">
-                        <Image
+                        <NextImage
                           src={item.image_uri}
                           alt={item.name}
                           fill

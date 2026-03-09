@@ -1,7 +1,7 @@
 "use client";
 
 import { type SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
+import NextImage from "next/image";
 import {
   Drawer,
   DrawerClose,
@@ -550,7 +550,7 @@ export function SeekersGallery() {
                     className="overflow-hidden border border-zinc-700/40 bg-zinc-900 text-left transition-transform hover:scale-[1.02] hover:border-zinc-600"
                   >
                     <div className="relative aspect-square w-full bg-zinc-900">
-                      <Image
+                      <NextImage
                         src={item.image_uri}
                         alt={item.name}
                         fill

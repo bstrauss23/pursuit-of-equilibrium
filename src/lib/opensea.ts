@@ -105,7 +105,7 @@ function formatBaseUnits(rawAmount: string, decimals: number) {
   const scale = BigInt(10) ** BigInt(decimals);
   const whole = amount / scale;
   const fraction = amount % scale;
-  if (fraction === 0n) return whole.toString();
+  if (fraction === BigInt(0)) return whole.toString();
 
   const fractionText = fraction.toString().padStart(decimals, "0").slice(0, 4).replace(/0+$/, "");
   return fractionText ? `${whole.toString()}.${fractionText}` : whole.toString();

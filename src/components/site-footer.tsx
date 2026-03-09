@@ -68,7 +68,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className={isLuxRoute ? "border-t border-white/10 py-4" : "border-t border-border py-4"}>
-        <p className={`mx-auto content-width px-4 text-lg md:px-6 ${isLuxRoute ? "text-zinc-400" : "text-muted-foreground"}`}>
+        <p className={`mx-auto content-width px-4 text-sm md:px-6 md:text-lg ${isLuxRoute ? "text-zinc-400" : "text-muted-foreground"}`}>
           © 2025 Transient Labs, Inc. All rights reserved.
         </p>
       </div>

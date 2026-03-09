@@ -4,6 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Menu } from "lucide-react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+} from "@/components/ui/drawer";
 
 const defaultNavItems = [
   { href: "/lux", label: "Lux" },
@@ -26,6 +32,7 @@ export function SiteHeader() {
   const isLuxRoute = pathname.startsWith("/lux");
   const navItems = isLuxRoute ? luxNavItems : defaultNavItems;
   const [hash, setHash] = useState("");
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   useEffect(() => {
     const updateHash = () => setHash(window.location.hash);
@@ -88,26 +95,70 @@ export function SiteHeader() {
         </Link>
 
         {showNav ? (
-          <nav className="hidden items-center gap-6 md:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={(event) => onNavClick(event, item.href)}
-                className={`text-lg transition-colors hover:text-foreground ${
+          <>
+            <nav className="hidden items-center gap-6 md:flex">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={(event) => onNavClick(event, item.href)}
+                  className={`text-lg transition-colors hover:text-foreground ${
+                    isLuxRoute
+                      ? isActiveHref(item.href)
+                        ? "text-zinc-100 underline underline-offset-4"
+                        : "text-zinc-400 hover:text-zinc-200"
+                      : isActiveHref(item.href)
+                        ? "text-foreground underline underline-offset-4"
+                        : "text-muted-foreground"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            <Drawer open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen} direction="right">
+              <button
+                type="button"
+                aria-label="Open navigation menu"
+                onClick={() => setIsMobileNavOpen(true)}
+                className={`inline-flex items-center justify-center rounded-sm border p-2 md:hidden ${
                   isLuxRoute
-                    ? isActiveHref(item.href)
-                      ? "text-zinc-100 underline underline-offset-4"
-                      : "text-zinc-400 hover:text-zinc-200"
-                    : isActiveHref(item.href)
-                      ? "text-foreground underline underline-offset-4"
-                      : "text-muted-foreground"
+                    ? "border-zinc-700 bg-zinc-900/70 text-zinc-100"
+                    : "border-border bg-background text-foreground"
                 }`}
               >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+                <Menu className="size-5" />
+              </button>
+              <DrawerContent
+                className={`md:hidden ${
+                  isLuxRoute ? "border-zinc-700 bg-[#17181b] text-zinc-100" : "border-border bg-background"
+                }`}
+              >
+                <nav className="flex flex-col gap-1 p-4 pt-6">
+                  {navItems.map((item) => (
+                    <DrawerClose asChild key={`mobile-${item.href}`}>
+                      <Link
+                        href={item.href}
+                        onClick={(event) => onNavClick(event, item.href)}
+                        className={`rounded-sm border px-3 py-2 text-base ${
+                          isLuxRoute
+                            ? isActiveHref(item.href)
+                              ? "border-zinc-500 bg-zinc-800 text-zinc-100"
+                              : "border-zinc-700 bg-zinc-900 text-zinc-300"
+                            : isActiveHref(item.href)
+                              ? "border-foreground/30 bg-accent text-foreground"
+                              : "border-border bg-background text-muted-foreground"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    </DrawerClose>
+                  ))}
+                </nav>
+              </DrawerContent>
+            </Drawer>
+          </>
         ) : null}
       </div>
     </header>
