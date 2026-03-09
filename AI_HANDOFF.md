@@ -37,7 +37,27 @@ Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
     - Same top-third anchored positioning and matching type scale conventions.
   - Lux route forces `html/body` background color while mounted to prevent white overscroll reveal.
   - Header and footer are route-aware dark mode on Lux.
-  - Lux header nav is intentionally reduced to `Lux` + `Pendulums` only (section-specific nav items deferred).
+  - Lux header nav now includes `About` (`/lux#about`) with same hash-scroll behavior/offset pattern as Pendulums.
+  - Added Lux gallery grid driven by `public/data/lux.json`:
+    - Numerical ordering (`Lux No. 1` through `Lux No. 7`).
+    - Responsive masonry behavior with left-to-right row reading order.
+    - Mobile layout is 2 columns.
+    - Card hover title overlay (all caps) using work name.
+  - Lux media handling:
+    - Uses `next/image` optimization on Lux route.
+    - Remote image allowlist added for `ipfs.io`, `dweb.link`, and `arweave.net`.
+    - IPFS image fallback retries from `dweb.link` when `ipfs.io` fails.
+  - Lux card details now open in a dark shadcn `Dialog` (not drawer):
+    - Two-column desktop / stacked mobile.
+    - Includes image, name, description, and attributes from `lux.json`.
+    - Dialog scroll behavior is mobile-friendly (`y` overflow on mobile).
+    - Includes secondary-acquisition inquiry copy (OpenSea CTA removed for now).
+  - Lux About section added below grid:
+    - Includes white-themed heading with side gradients and full article copy from `ABOUT.md`.
+    - Uses same About anchor offset behavior and section divider rhythm as Pendulums.
+  - Added animated ambient atmospheric dust layer near top light bleed:
+    - Canvas-based noise drift with masking and blend for light-caught atmosphere.
+    - Tuned for performance (adaptive particle count, frame cap, visibility pause).
 - Pendulums `/pendulums`:
   - Hero + `Motion Carries Structure` section.
   - Hero media switched from static image to iframe background (`/pendulums-hero-script.html`).
@@ -94,22 +114,28 @@ Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
 6. Playground embed:
    - Verify panel scroll works across desktop/mobile heights.
 7. Lint:
-   - Non-blocking `@next/next/no-img-element` warnings remain in gallery intentionally.
+  - Non-blocking `@next/next/no-img-element` warnings remain in gallery intentionally.
+8. Lux atmospheric dust:
+   - Browser/device verify realism and performance on lower-powered mobile hardware.
 
 ## Key Files
 - `src/components/site-header.tsx`
 - `src/app/globals.css`
 - `src/components/landing-doorways.tsx`
+- `src/components/doorway-image.tsx`
 - `src/components/deferred-hero-iframe.tsx`
+- `src/components/lux-atmospheric-dust.tsx`
 - `src/app/lux/page.tsx`
 - `src/app/pendulums/page.tsx`
 - `src/components/pendulums-system-section.tsx`
 - `src/components/pendulums-gallery.tsx`
 - `src/app/pendulums/playground/page.tsx`
+- `next.config.ts`
 - `public/pendulum-playground-15.html`
 - `public/pendulums-hero-script.html`
 - `public/temp-background-hero.jpg`
 - `public/temp-background-hero-light.jpg`
+- `public/data/lux.json`
 - `src/app/api/listings/status/route.ts`
 - `src/app/api/owners/pendulums/route.ts`
 - `src/lib/ens.ts`
@@ -123,6 +149,32 @@ Project: `pursuit-of-equilibrium` (Next.js + Tailwind + shadcn)
 - `PUBLIC_MAINNET_RPC_URL` (optional; ENS resolution override for viem/public RPC flow)
 
 ## Session Log
+
+### 2026-03-06T23:59-07:00 (Lux expansion + interaction pass)
+- Lux grid/content build-out:
+  - Added Lux works grid under hero from `public/data/lux.json`.
+  - Enforced numeric ordering and tuned responsive masonry behavior with correct left-to-right reading order.
+  - Set mobile Lux grid to 2 columns.
+  - Added hover/focus title overlays for Lux cards.
+- Lux media URL/optimization pipeline:
+  - Added IPFS URL normalization rules for Lux assets (`/media` handling for Lux No. 3-7; Lux No. 2 Arweave passthrough).
+  - Added IPFS gateway fallback to `dweb.link` when primary fails.
+  - Switched Lux images to `next/image` and configured remote image hosts in `next.config.ts`.
+  - Tuned landing doorway `next/image` settings (`sizes`/quality).
+- Lux details interaction:
+  - Iterated from Drawer concept to final shadcn `Dialog` flow.
+  - Removed card autoscroll/scale behavior; click now opens modal directly.
+  - Dialog includes artwork image + metadata (name, description, attributes) and dark Lux styling.
+  - Added secondary-acquisition inquiry copy (OpenSea button removed per current direction).
+  - Desktop layout stabilized to keep image presentation consistent across varying description lengths.
+- Lux About + navigation:
+  - Added section divider and `About Lux` heading treatment to mirror Pendulums structure.
+  - Inserted Lux About article copy from `ABOUT.md` (figures deferred).
+  - Added Lux header `About` nav item (`/lux#about`) and aligned anchor offset behavior (`scroll-mt-28`).
+- Lux atmospheric pass:
+  - Added new top-of-page animated dust component (`src/components/lux-atmospheric-dust.tsx`) tied to top light bleed.
+  - Multiple rounds of motion/size/blur tuning for realism.
+  - Added performance safeguards: adaptive particle count, capped FPS, reduced-motion handling, and tab visibility pause.
 
 ### 2026-03-06T23:59-07:00
 - Lux side kickoff / dark mode pass:

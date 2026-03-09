@@ -14,8 +14,8 @@ const defaultNavItems = [
   { href: "/pendulums/playground", label: "Playground" },
 ];
 const luxNavItems = [
-  { href: "/lux", label: "Lux" },
   { href: "/pendulums", label: "Pendulums" },
+  { href: "/lux", label: "Lux" },
   { href: "/lux#about", label: "About" },
 ];
 

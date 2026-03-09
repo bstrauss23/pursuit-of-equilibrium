@@ -4,6 +4,7 @@ import Image from "next/image";
 import { type SyntheticEvent, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { LuxAtmosphericDust } from "@/components/lux-atmospheric-dust";
+import { Figure } from "@/components/figure";
 
 import luxData from "../../../public/data/lux.json";
 
@@ -305,6 +306,24 @@ export default function LuxPage() {
             </p>
             <p>What appears as a drawing is actually the trace of a real physical system moving toward equilibrium.</p>
 
+            <Figure caption="A video of the earliest pendulum rig built from string, duct tape, aluminum foil, and a cheap flashlight. This rig was a simple pendulum system.">
+              <div className="flex gap-3">
+                <video
+                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/original-rig.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="h-auto w-1/2 rounded-md object-cover"
+                />
+                <img
+                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/original-grid.jpeg"
+                  alt="Original pendulum grid"
+                  className="h-auto w-1/2 rounded-md object-cover"
+                />
+              </div>
+            </Figure>
+
             <h3 className="pt-8 text-2xl tracking-[0.08em]">MAKING MOTION VISIBLE</h3>
             <p>
               Pendulums are among the simplest systems in physics. A suspended mass naturally swings under the
@@ -319,6 +338,17 @@ export default function LuxPage() {
               different oscillation periods.
             </p>
             <p>Lux was an attempt to capture these hidden patterns directly from the physical world.</p>
+
+            <Figure caption="A video showing the long exposure capture process of the Blackburn pendulum. The rig in this video was one of the earlier test rigs.">
+              <video
+                src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/long-exposure-example.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full rounded-md"
+              />
+            </Figure>
 
             <h3 className="pt-8 text-2xl tracking-[0.08em]">FROM SIMPLE PENDULUM TO BLACKBURN PENDULUM</h3>
             <p>The earliest Lux experiments were improvised.</p>
@@ -336,6 +366,14 @@ export default function LuxPage() {
               Each axis swings with a slightly different period, causing the motions to interfere and generate
               intricate geometric paths.
             </p>
+
+            <Figure caption="A diagram comparing simple pendulum system and Blackburn pendulum system.">
+              <img
+                src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/diagram-2.jpg"
+                alt="A diagram comparing simple pendulum system and Blackburn pendulum system"
+                className="w-full rounded-md"
+              />
+            </Figure>
 
             <h3 className="pt-8 text-2xl tracking-[0.08em]">BUILDING THE RIG</h3>
             <p>As the experiments progressed, the pendulum system became increasingly refined.</p>
@@ -359,6 +397,18 @@ export default function LuxPage() {
               Exposure times varied depending on the motion of the system. Some lasted less than a minute, while
               others captured several minutes as the pendulum gradually lost energy.
             </p>
+
+            <Figure caption="A timelapse build of the main Blackburn pendulum used to create the Lux artworks.">
+              <video
+                src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/making-of-blackburn.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls
+                className="w-full rounded-md"
+              />
+            </Figure>
 
             <h3 className="pt-8 text-2xl tracking-[0.08em]">THE LUX COLLECTION</h3>
             <p>Hundreds of exposures were captured during these experiments.</p>
@@ -394,10 +444,43 @@ export default function LuxPage() {
               exploration.
             </p>
 
+            <Figure caption="The four bidder's editions given away during the Lux auctions. There was one for Lux No. 1, 2, 3 and 7.">
+              <div className="grid grid-cols-2 gap-3 md:flex md:flex-wrap">
+                {[
+                  { src: "tempus.jpeg", alt: "Tempus" },
+                  { src: "motu.jpeg", alt: "Motu" },
+                  { src: "Clepsydra.jpeg", alt: "Clepsydra" },
+                  { src: "kinesis.gif", alt: "Kinesis" },
+                ].map(({ src, alt }) => (
+                  <img
+                    key={src}
+                    src={`http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/${src}`}
+                    alt={alt}
+                    className="w-full rounded-md md:h-64 md:w-auto"
+                  />
+                ))}
+              </div>
+            </Figure>
+
             <h3 className="pt-8 text-2xl tracking-[0.08em]">A BEGINNING</h3>
             <p>Lux began as a simple pendulum experiment in a dark room.</p>
             <p>In building tools to understand and preview these systems, a new medium began to emerge.</p>
             <p>That evolution became Chapter II: Pendulums.</p>
+
+            <Figure caption="A side-by-side comparison showing a Lux light painting and a Pendulum output of the same mode.">
+              <div className="grid grid-cols-2 gap-3">
+                <img
+                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/lux-pendulum-1.jpeg"
+                  alt="A Lux light painting"
+                  className="w-full rounded-md object-cover"
+                />
+                <img
+                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/lux-pendulum-2.jpg"
+                  alt="A Pendulum output of the same mode"
+                  className="w-full rounded-md object-cover"
+                />
+              </div>
+            </Figure>
           </div>
         </article>
 
