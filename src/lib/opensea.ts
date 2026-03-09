@@ -1,15 +1,14 @@
 const OPENSEA_BASE_URL = "https://api.opensea.io/api/v2";
 const OPENSEA_CHAIN = "ethereum";
-const OPENSEA_CONTRACT = "0x4af0370076a44c8ddc23db9ae5cecba669280372";
+const OPENSEA_PENDULUMS_CONTRACT = "0x4af0370076a44c8ddc23db9ae5cecba669280372";
+const OPENSEA_SEEKERS_CONTRACT = "0x44d504fb4b2aca2c17a9bc5e56dd002f6032333f";
+const OPENSEA_SEEKERS_COLLECTION_SLUG = "pursuit-of-equilibrium-the-seeker-s-collection";
 
 const TOKEN_CACHE_TTL_MS = 60_000;
 const COLLECTION_LISTINGS_CACHE_TTL_MS = 60_000;
 const SLUG_CACHE_TTL_MS = 10 * 60_000;
 
-type SlugCache = {
-  slug: string;
-  expiresAt: number;
-};
+export type OpenSeaCollectionKey = "pendulums" | "seekers";
 
 type TokenCacheValue = {
   data: ListingStatus;
@@ -31,16 +30,39 @@ export type ListingStatus = {
   fetchedAt: string;
 };
 
-const slugCache: SlugCache = {
-  slug: "",
-  expiresAt: 0,
+const slugCache: Record<OpenSeaCollectionKey, { slug: string; expiresAt: number }> = {
+  pendulums: { slug: "", expiresAt: 0 },
+  seekers: { slug: "", expiresAt: 0 },
 };
 
-const tokenCache = new Map<number, TokenCacheValue>();
-const collectionListingsCache: CollectionListingsCacheValue = {
-  data: {},
-  fetchedAt: "",
-  expiresAt: 0,
+const tokenCache = new Map<string, TokenCacheValue>();
+const collectionListingsCache: Record<OpenSeaCollectionKey, CollectionListingsCacheValue> = {
+  pendulums: {
+    data: {},
+    fetchedAt: "",
+    expiresAt: 0,
+  },
+  seekers: {
+    data: {},
+    fetchedAt: "",
+    expiresAt: 0,
+  },
+};
+
+const collectionConfig: Record<
+  OpenSeaCollectionKey,
+  { contractAddress: string; explicitSlug: string | null; fallbackSlug: string | null }
+> = {
+  pendulums: {
+    contractAddress: OPENSEA_PENDULUMS_CONTRACT,
+    explicitSlug: process.env.OPENSEA_COLLECTION_SLUG?.trim() ?? null,
+    fallbackSlug: null,
+  },
+  seekers: {
+    contractAddress: OPENSEA_SEEKERS_CONTRACT,
+    explicitSlug: process.env.OPENSEA_SEEKERS_COLLECTION_SLUG?.trim() ?? null,
+    fallbackSlug: OPENSEA_SEEKERS_COLLECTION_SLUG,
+  },
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -131,19 +153,21 @@ async function openSeaFetch(path: string) {
   return response.json();
 }
 
-async function resolveCollectionSlug() {
-  const explicitSlug = process.env.OPENSEA_COLLECTION_SLUG?.trim();
-  if (explicitSlug) return explicitSlug;
+async function resolveCollectionSlug(collection: OpenSeaCollectionKey = "pendulums") {
+  const config = collectionConfig[collection];
+  if (config.explicitSlug) return config.explicitSlug;
+  if (config.fallbackSlug) return config.fallbackSlug;
 
-  if (slugCache.slug && Date.now() < slugCache.expiresAt) {
-    return slugCache.slug;
+  const cached = slugCache[collection];
+  if (cached.slug && Date.now() < cached.expiresAt) {
+    return cached.slug;
   }
 
-  const payload = await openSeaFetch(`/chain/${OPENSEA_CHAIN}/contract/${OPENSEA_CONTRACT}`);
+  const payload = await openSeaFetch(`/chain/${OPENSEA_CHAIN}/contract/${config.contractAddress}`);
   const obj = asRecord(payload);
-  const collection = asRecord(obj?.collection);
+  const collectionObj = asRecord(obj?.collection);
   const slug =
-    readString(collection?.slug) ??
+    readString(collectionObj?.slug) ??
     readString(obj?.collection_slug) ??
     readString(obj?.slug) ??
     "";
@@ -152,8 +176,8 @@ async function resolveCollectionSlug() {
     throw new Error("Could not resolve collection slug. Set OPENSEA_COLLECTION_SLUG in .env.local.");
   }
 
-  slugCache.slug = slug;
-  slugCache.expiresAt = Date.now() + SLUG_CACHE_TTL_MS;
+  cached.slug = slug;
+  cached.expiresAt = Date.now() + SLUG_CACHE_TTL_MS;
   return slug;
 }
 
@@ -271,23 +295,24 @@ function extractOwnerAddressFromListing(listing: Record<string, unknown>) {
   );
 }
 
-export function getContractAddress() {
-  return OPENSEA_CONTRACT;
+export function getContractAddress(collection: OpenSeaCollectionKey = "pendulums") {
+  return collectionConfig[collection].contractAddress;
 }
 
-export async function getCollectionActiveListings(): Promise<{
+export async function getCollectionActiveListings(collection: OpenSeaCollectionKey = "pendulums"): Promise<{
   fetchedAt: string;
   listingsByTokenId: Record<number, ListingStatus>;
 }> {
+  const cache = collectionListingsCache[collection];
   const now = Date.now();
-  if (collectionListingsCache.expiresAt > now) {
+  if (cache.expiresAt > now) {
     return {
-      fetchedAt: collectionListingsCache.fetchedAt,
-      listingsByTokenId: collectionListingsCache.data,
+      fetchedAt: cache.fetchedAt,
+      listingsByTokenId: cache.data,
     };
   }
 
-  const slug = await resolveCollectionSlug();
+  const slug = await resolveCollectionSlug(collection);
   const payload = await openSeaFetch(`/listings/collection/${slug}/all?limit=200`);
   const root = asRecord(payload) ?? {};
   const listingsRaw = Array.isArray(root.listings) ? root.listings : [];
@@ -327,31 +352,35 @@ export async function getCollectionActiveListings(): Promise<{
     }
   }
 
-  collectionListingsCache.data = listingsByTokenId;
-  collectionListingsCache.fetchedAt = fetchedAt;
-  collectionListingsCache.expiresAt = now + COLLECTION_LISTINGS_CACHE_TTL_MS;
+  cache.data = listingsByTokenId;
+  cache.fetchedAt = fetchedAt;
+  cache.expiresAt = now + COLLECTION_LISTINGS_CACHE_TTL_MS;
 
   return { fetchedAt, listingsByTokenId };
 }
 
-export async function getBestListingStatus(tokenId: number): Promise<ListingStatus> {
+export async function getBestListingStatus(
+  tokenId: number,
+  collection: OpenSeaCollectionKey = "pendulums"
+): Promise<ListingStatus> {
   const now = Date.now();
-  const cached = tokenCache.get(tokenId);
+  const tokenCacheKey = `${collection}:${tokenId}`;
+  const cached = tokenCache.get(tokenCacheKey);
   if (cached && now < cached.expiresAt) {
     return cached.data;
   }
 
   const fallback = defaultNotListed();
-  const slug = await resolveCollectionSlug();
+  const slug = await resolveCollectionSlug(collection);
   const payload = await openSeaFetch(`/listings/collection/${slug}/nfts/${tokenId}/best`);
   if (!payload) {
-    tokenCache.set(tokenId, { data: fallback, expiresAt: now + TOKEN_CACHE_TTL_MS });
+    tokenCache.set(tokenCacheKey, { data: fallback, expiresAt: now + TOKEN_CACHE_TTL_MS });
     return fallback;
   }
 
   const listing = extractListingObject(payload);
   if (!listing) {
-    tokenCache.set(tokenId, { data: fallback, expiresAt: now + TOKEN_CACHE_TTL_MS });
+    tokenCache.set(tokenCacheKey, { data: fallback, expiresAt: now + TOKEN_CACHE_TTL_MS });
     return fallback;
   }
 
@@ -365,7 +394,7 @@ export async function getBestListingStatus(tokenId: number): Promise<ListingStat
     fetchedAt: new Date().toISOString(),
   };
 
-  tokenCache.set(tokenId, { data: result, expiresAt: now + TOKEN_CACHE_TTL_MS });
+  tokenCache.set(tokenCacheKey, { data: result, expiresAt: now + TOKEN_CACHE_TTL_MS });
   return result;
 }
 
@@ -378,7 +407,7 @@ export async function getOwnedPendulumTokenIds(walletAddress: string): Promise<{
     throw new Error("Invalid wallet address.");
   }
 
-  const slug = await resolveCollectionSlug();
+  const slug = await resolveCollectionSlug("pendulums");
   const tokenIds = new Set<number>();
   let nextCursor: string | null = null;
 

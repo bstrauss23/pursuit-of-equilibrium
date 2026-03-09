@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCollectionActiveListings } from "@/lib/opensea";
+import { getCollectionActiveListings, type OpenSeaCollectionKey } from "@/lib/opensea";
 
 const MAX_TOKEN_IDS = 80;
 
@@ -19,10 +19,16 @@ function parseTokenIds(value: string | null) {
   return Array.from(deduped);
 }
 
+function parseCollection(value: string | null): OpenSeaCollectionKey {
+  if (value === "seekers") return "seekers";
+  return "pendulums";
+}
+
 export async function GET(request: NextRequest) {
   try {
     const tokenIds = parseTokenIds(request.nextUrl.searchParams.get("tokenIds"));
-    const { fetchedAt, listingsByTokenId } = await getCollectionActiveListings();
+    const collection = parseCollection(request.nextUrl.searchParams.get("collection"));
+    const { fetchedAt, listingsByTokenId } = await getCollectionActiveListings(collection);
 
     const selectedEntries =
       tokenIds.length > 0
@@ -33,6 +39,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       updatedAt: fetchedAt,
+      collection,
       requested: tokenIds.length > 0 ? tokenIds.length : null,
       listedCount: Object.keys(listingsByTokenId).length,
       listings: Object.fromEntries(selectedEntries),

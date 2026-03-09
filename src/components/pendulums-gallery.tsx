@@ -1,6 +1,7 @@
 "use client";
 
 import { type SyntheticEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import {
   Drawer,
@@ -1013,15 +1014,15 @@ export function PendulumsGallery() {
                       onClick={() => setActiveItem(item)}
                       className="overflow-hidden border border-border bg-[#fffcf7] text-left shadow-[0_2px_5px_#0003] transition-transform hover:scale-[1.02]"
                     >
-                      <img
-                        src={item.image_uri}
-                        alt={item.name}
-                        loading="lazy"
-                        decoding="async"
-                        referrerPolicy="no-referrer"
-                        onError={handleIpfsImageError}
-                        className="block aspect-square w-full bg-background object-cover"
-                      />
+                      <div className="relative aspect-square w-full bg-background">
+                        <Image
+                          src={item.image_uri}
+                          alt={item.name}
+                          fill
+                          sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, 50vw"
+                          className="object-cover"
+                        />
+                      </div>
                       <div className="grid gap-1 p-3">
                         <div className="grid gap-1">
                           <p className="text-sm">{item.name}</p>

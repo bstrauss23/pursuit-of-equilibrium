@@ -17,6 +17,7 @@ const luxNavItems = [
   { href: "/pendulums", label: "Pendulums" },
   { href: "/lux", label: "Lux" },
   { href: "/lux#about", label: "About" },
+  { href: "/lux/seekers-collection", label: "The Seeker's Collection" },
 ];
 
 export function SiteHeader() {
