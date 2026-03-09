@@ -154,7 +154,7 @@
     transition: background-color 160ms ease, border-color 160ms ease;
   }
 
-  button:not(:disabled):hover {
+  button:not(:disabled):hover:not([data-slot="checkbox"]) {
     background-color: var(--button-hover-bg) !important;
   }
 }
@@ -238,6 +238,7 @@
   position: absolute;
   inset: 0;
 }
+
 
 .doorway-mobile-pendulum-mask-top {
   clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);

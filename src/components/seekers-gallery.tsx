@@ -12,7 +12,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -141,7 +141,7 @@ export function SeekersGallery() {
   const [sort, setSort] = useState<SortMode>("token_asc");
   const [selected, setSelected] = useState<Map<string, Set<string>>>(new Map());
   const [onlyListed, setOnlyListed] = useState(false);
-  const [listedPriceSort, setListedPriceSort] = useState<ListedPriceSort>("price_desc");
+  const [listedPriceSort, setListedPriceSort] = useState<ListedPriceSort>("price_asc");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activeItem, setActiveItem] = useState<SeekerItem | null>(null);
   const [listingByTokenId, setListingByTokenId] = useState<Record<number, ListingInfo>>({});
@@ -344,7 +344,7 @@ export function SeekersGallery() {
     setSelected(new Map());
     setSort("token_asc");
     setOnlyListed(false);
-    setListedPriceSort("price_desc");
+    setListedPriceSort("price_asc");
   }
 
   const selectedFilterChips = Array.from(selected.entries()).flatMap(([trait, values]) =>
@@ -496,12 +496,13 @@ export function SeekersGallery() {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-zinc-200">
-                  <Checkbox
+                  <Switch
                     checked={onlyListed}
                     onCheckedChange={(checked) => {
                       setVisibleCount(PAGE_SIZE);
                       setOnlyListed(checked === true);
                     }}
+                    className="border-zinc-600 data-[state=unchecked]:bg-zinc-700 data-[state=checked]:bg-zinc-400 [&_[data-slot=switch-thumb]]:bg-zinc-900 data-[state=checked]:[&_[data-slot=switch-thumb]]:bg-zinc-950"
                     aria-label="Only show listed seekers"
                   />
                   <span>Only show listed for sale</span>

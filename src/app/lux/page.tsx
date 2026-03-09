@@ -194,14 +194,29 @@ export default function LuxPage() {
   useEffect(() => {
     const prevBodyBg = document.body.style.backgroundColor;
     const prevHtmlBg = document.documentElement.style.backgroundColor;
+    const prevBodyButtonHover = document.body.style.getPropertyValue("--button-hover-bg");
+    const prevHtmlButtonHover = document.documentElement.style.getPropertyValue("--button-hover-bg");
     const luxBg = "#17181b";
+    const luxButtonHover = "oklch(0.24 0.007 286.1)";
 
     document.body.style.backgroundColor = luxBg;
     document.documentElement.style.backgroundColor = luxBg;
+    document.body.style.setProperty("--button-hover-bg", luxButtonHover);
+    document.documentElement.style.setProperty("--button-hover-bg", luxButtonHover);
 
     return () => {
       document.body.style.backgroundColor = prevBodyBg;
       document.documentElement.style.backgroundColor = prevHtmlBg;
+      if (prevBodyButtonHover) {
+        document.body.style.setProperty("--button-hover-bg", prevBodyButtonHover);
+      } else {
+        document.body.style.removeProperty("--button-hover-bg");
+      }
+      if (prevHtmlButtonHover) {
+        document.documentElement.style.setProperty("--button-hover-bg", prevHtmlButtonHover);
+      } else {
+        document.documentElement.style.removeProperty("--button-hover-bg");
+      }
     };
   }, []);
 

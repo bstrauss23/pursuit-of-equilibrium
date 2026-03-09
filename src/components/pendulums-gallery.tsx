@@ -13,7 +13,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -269,7 +269,7 @@ export function PendulumsGallery() {
   const [sort, setSort] = useState<SortMode>("token_asc");
   const [selected, setSelected] = useState<Map<string, Set<string>>>(new Map());
   const [onlyListed, setOnlyListed] = useState(false);
-  const [listedPriceSort, setListedPriceSort] = useState<ListedPriceSort>("price_desc");
+  const [listedPriceSort, setListedPriceSort] = useState<ListedPriceSort>("price_asc");
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activeItem, setActiveItem] = useState<PendulumItem | null>(null);
@@ -510,7 +510,7 @@ export function PendulumsGallery() {
     setSelected(new Map());
     setSort("token_asc");
     setOnlyListed(false);
-    setListedPriceSort("price_desc");
+    setListedPriceSort("price_asc");
   }
 
   function applySingleAttributeFilter(trait: string, value: string) {
@@ -957,7 +957,7 @@ export function PendulumsGallery() {
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
-                    <Checkbox
+                    <Switch
                       checked={onlyListed}
                       onCheckedChange={(checked) => {
                         setVisibleCount(PAGE_SIZE);
