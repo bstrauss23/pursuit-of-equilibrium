@@ -502,7 +502,7 @@ export function SeekersGallery() {
                       setVisibleCount(PAGE_SIZE);
                       setOnlyListed(checked === true);
                     }}
-                    className="border-zinc-600 data-[state=unchecked]:bg-zinc-700 data-[state=checked]:bg-zinc-400 [&_[data-slot=switch-thumb]]:bg-zinc-900 data-[state=checked]:[&_[data-slot=switch-thumb]]:bg-zinc-950"
+                    className="border-zinc-600 data-[state=unchecked]:bg-zinc-700 data-[state=checked]:bg-zinc-400 hover:data-[state=unchecked]:bg-zinc-700/95 hover:data-[state=checked]:bg-zinc-400/95 [&_[data-slot=switch-thumb]]:bg-zinc-900 data-[state=checked]:[&_[data-slot=switch-thumb]]:bg-zinc-950"
                     aria-label="Only show listed seekers"
                   />
                   <span>Only show listed for sale</span>

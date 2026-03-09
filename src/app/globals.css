@@ -154,7 +154,7 @@
     transition: background-color 160ms ease, border-color 160ms ease;
   }
 
-  button:not(:disabled):hover:not([data-slot="checkbox"]) {
+  button:not(:disabled):hover:not([data-slot="checkbox"]):not([data-slot="switch"]) {
     background-color: var(--button-hover-bg) !important;
   }
 }
