@@ -287,6 +287,7 @@ export function PendulumsGallery() {
   const [isExportingGrid, setIsExportingGrid] = useState(false);
   const [gridExportError, setGridExportError] = useState("");
   const [isSharingGrid, setIsSharingGrid] = useState(false);
+  const [shareImageUrl, setShareImageUrl] = useState<string | null>(null);
   const [isGridOrientationSwapped, setIsGridOrientationSwapped] = useState(false);
   const [previewCellSize, setPreviewCellSize] = useState(0);
   const [isGridDragging, setIsGridDragging] = useState(false);
@@ -777,6 +778,17 @@ export function PendulumsGallery() {
     }
   }
 
+  function isMobileDevice() {
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  }
+
+  function openTweetIntent() {
+    const tweetText = encodeURIComponent(
+      `My Pendulums grid by @benstraussphoto`
+    );
+    window.open(`https://x.com/intent/tweet?text=${tweetText}`, "_blank");
+  }
+
   async function shareGridToX() {
     if (orderedWalletItems.length === 0) return;
 
@@ -816,30 +828,33 @@ export function PendulumsGallery() {
         }
       }
 
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((value) => {
-          if (!value) {
-            reject(new Error("PNG export failed."));
-            return;
-          }
-          resolve(value);
-        }, "image/png");
-      });
+      if (isMobileDevice()) {
+        // On mobile: show a dialog with the image so the user can long-press to copy
+        const dataUrl = canvas.toDataURL("image/png");
+        setShareImageUrl(dataUrl);
+      } else {
+        // On desktop: copy to clipboard, alert, then open X
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob((value) => {
+            if (!value) {
+              reject(new Error("PNG export failed."));
+              return;
+            }
+            resolve(value);
+          }, "image/png");
+        });
 
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ "image/png": blob }),
-        ]);
-      } catch {
-        // clipboard write may fail in some browsers
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
+        } catch {
+          // clipboard write may fail in some browsers
+        }
+
+        window.alert("Grid image copied to clipboard! Paste it into your tweet.");
+        openTweetIntent();
       }
-
-      window.alert("Grid image copied to clipboard! Paste it into your tweet.");
-
-      const tweetText = encodeURIComponent(
-        `My Pendulums grid by @benstraussphoto`
-      );
-      window.open(`https://x.com/intent/tweet?text=${tweetText}`, "_blank");
     } catch (error) {
       setGridExportError(error instanceof Error ? error.message : "Share failed.");
     } finally {
@@ -1325,6 +1340,54 @@ export function PendulumsGallery() {
                 )}
               </Button>
             </div> : null}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(shareImageUrl)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShareImageUrl(null);
+          }
+        }}
+      >
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-md border border-border bg-[#fffcf7] p-4 shadow-[0_2px_5px_#0003]"
+        >
+          <DialogTitle className="text-center text-base tracking-[0.06em]">
+            Long press the image to copy
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Save the grid image and share it on X
+          </DialogDescription>
+          {shareImageUrl ? (
+            <img
+              src={shareImageUrl}
+              alt="Pendulums grid"
+              className="w-full rounded-md"
+            />
+          ) : null}
+          <div className="flex justify-center gap-2">
+            <Button
+              type="button"
+              onClick={() => {
+                openTweetIntent();
+              }}
+              variant="outline"
+              className="rounded-none text-sm"
+            >
+              Take to X
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setShareImageUrl(null)}
+              variant="outline"
+              className="rounded-none text-sm"
+            >
+              Close
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
