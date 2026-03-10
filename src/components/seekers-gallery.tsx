@@ -424,11 +424,11 @@ export function SeekersGallery() {
     <section className="mx-auto w-full max-w-[1600px] px-4 py-8 md:px-6">
       <div className="mb-12 flex items-center justify-center gap-4 md:mb-16 md:gap-6">
         <span className="h-[2px] w-16 bg-gradient-to-r from-transparent to-zinc-100/45 md:w-60" />
-        <h1 className="text-3xl text-zinc-100/90 md:text-5xl">The Seeker&apos;s Collection</h1>
+        <h1 className="text-center text-3xl text-zinc-100/90 md:text-5xl">The Seeker&apos;s Collection</h1>
         <span className="h-[2px] w-16 bg-gradient-to-l from-transparent to-zinc-100/45 md:w-60" />
       </div>
 
-      <p className="mb-10 text-base leading-8 text-zinc-300 md:text-lg">
+      <p className="mb-10 text-center text-base leading-8 text-zinc-300 md:text-left md:text-lg">
         The Seeker&apos;s Collection consists of special edition artworks distributed to every unique bidder
         across four Lux auctions. Each piece is a bidder&apos;s edition tied to a specific Lux work, forming
         a companion collection that rewards participation and curiosity. Four editions were released:

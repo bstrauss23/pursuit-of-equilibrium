@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { type SyntheticEvent, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { LuxAtmosphericDust } from "@/components/lux-atmospheric-dust";
 import { Figure } from "@/components/figure";
 
 import luxData from "../../../public/data/lux.json";
@@ -243,7 +242,6 @@ export default function LuxPage() {
             "radial-gradient(ellipse at center, rgba(255,247,235,0.18) 0%, rgba(245,236,222,0.10) 34%, rgba(210,198,180,0.04) 56%, rgba(200,188,172,0) 74%)",
         }}
       />
-      <LuxAtmosphericDust />
 
       <div className="relative mx-auto flex w-full max-w-[1700px] flex-col items-center px-4 pt-24 pb-16 md:px-8 md:pt-32 md:pb-24">
         <div className="mb-24 flex flex-col items-center gap-4 text-center md:mb-32 md:gap-6">
@@ -308,7 +306,7 @@ export default function LuxPage() {
         </div>
 
         <article className="mx-auto content-width px-4 pt-0 pb-10 md:px-6 md:pb-12">
-          <div className="space-y-5 text-base leading-8 text-zinc-200 md:text-lg">
+          <div className="space-y-5 text-center text-base leading-8 text-zinc-200 md:text-left md:text-lg">
             <p>Before code entered the story, there was light.</p>
             <p>
               Lux is the first chapter of Pursuit of Equilibrium, a body of work exploring how physical systems move

@@ -286,6 +286,7 @@ export function PendulumsGallery() {
   const [walletFetchLoading, setWalletFetchLoading] = useState(false);
   const [isExportingGrid, setIsExportingGrid] = useState(false);
   const [gridExportError, setGridExportError] = useState("");
+  const [isSharingGrid, setIsSharingGrid] = useState(false);
   const [isGridOrientationSwapped, setIsGridOrientationSwapped] = useState(false);
   const [previewCellSize, setPreviewCellSize] = useState(0);
   const [isGridDragging, setIsGridDragging] = useState(false);
@@ -776,6 +777,76 @@ export function PendulumsGallery() {
     }
   }
 
+  async function shareGridToX() {
+    if (orderedWalletItems.length === 0) return;
+
+    setIsSharingGrid(true);
+    setGridExportError("");
+    try {
+      const { columns, rows } = gridDimensions;
+      const isLandscape = columns >= rows;
+      const cellSize = isLandscape ? MIN_GRID_EXPORT_SIZE / columns : MIN_GRID_EXPORT_SIZE / rows;
+      const exportWidth = isLandscape ? MIN_GRID_EXPORT_SIZE : Math.round(cellSize * columns);
+      const exportHeight = isLandscape ? Math.round(cellSize * rows) : MIN_GRID_EXPORT_SIZE;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = exportWidth;
+      canvas.height = exportHeight;
+      const context = canvas.getContext("2d");
+      if (!context) {
+        throw new Error("Could not create export canvas.");
+      }
+
+      context.fillStyle = "#fffcf7";
+      context.fillRect(0, 0, exportWidth, exportHeight);
+
+      for (let index = 0; index < orderedWalletItems.length; index += 1) {
+        const item = orderedWalletItems[index];
+        const col = index % columns;
+        const row = Math.floor(index / columns);
+        const x = col * cellSize;
+        const y = row * cellSize;
+
+        try {
+          const image = await loadImage(item.image_uri);
+          drawImageCoverSquare(context, image, x, y, cellSize);
+        } catch {
+          context.fillStyle = "#f3ecdf";
+          context.fillRect(x, y, cellSize, cellSize);
+        }
+      }
+
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((value) => {
+          if (!value) {
+            reject(new Error("PNG export failed."));
+            return;
+          }
+          resolve(value);
+        }, "image/png");
+      });
+
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob }),
+        ]);
+      } catch {
+        // clipboard write may fail in some browsers
+      }
+
+      window.alert("Grid image copied to clipboard! Paste it into your tweet.");
+
+      const tweetText = encodeURIComponent(
+        `My Pendulums grid by @benstraussphoto`
+      );
+      window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, "_blank");
+    } catch (error) {
+      setGridExportError(error instanceof Error ? error.message : "Share failed.");
+    } finally {
+      setIsSharingGrid(false);
+    }
+  }
+
   const filtersUi = (
     <>
       <input
@@ -870,7 +941,7 @@ export function PendulumsGallery() {
             <h1 className="text-3xl text-foreground/80 md:text-5xl">The Gallery</h1>
             <span className="h-[2px] w-16 bg-gradient-to-l from-transparent to-foreground/40 md:w-60" />
           </div>
-          <p className="mb-10 text-base leading-8 text-foreground/80 md:text-lg">
+          <p className="mb-10 text-center text-base leading-8 text-foreground/80 md:text-left md:text-lg">
             This gallery presents the complete Pendulums collection of 512 works. Use the filters to explore the
             system from different angles, sorting pieces by parameters such as period ratios, amplitudes, damping,
             cycle count, and more. Each artwork includes its full output profile, revealing the variables that shaped
@@ -1220,11 +1291,11 @@ export function PendulumsGallery() {
 
             {gridExportError ? <p className="text-sm text-red-700">{gridExportError}</p> : null}
 
-            <div className="flex justify-end">
+            {orderedWalletItems.length > 0 ? <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 onClick={() => void downloadWalletGridPng()}
-                disabled={orderedWalletItems.length === 0 || isExportingGrid}
+                disabled={isExportingGrid}
                 variant="outline"
                 className="rounded-none text-sm"
               >
@@ -1237,7 +1308,23 @@ export function PendulumsGallery() {
                   "Save PNG (4K)"
                 )}
               </Button>
-            </div>
+              <Button
+                type="button"
+                onClick={() => void shareGridToX()}
+                disabled={isSharingGrid}
+                variant="outline"
+                className="rounded-none text-sm"
+              >
+                {isSharingGrid ? (
+                  <>
+                    <Spinner className="size-3.5" />
+                    Sharing...
+                  </>
+                ) : (
+                  "Share to X"
+                )}
+              </Button>
+            </div> : null}
           </div>
         </DialogContent>
       </Dialog>

@@ -95,38 +95,38 @@ function OutputProfileCards({ metadata }: { metadata: MetadataState }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="min-w-0 border border-border bg-[#f8f6f1] p-4 shadow-[0_2px_5px_#0003]">
-        <h4 className="mb-3 text-center text-xl tracking-[0.06em] text-foreground/80 uppercase md:text-left">Perfection</h4>
+        <h4 className="mb-3 text-left text-lg tracking-[0.06em] text-foreground/80 uppercase">Perfection</h4>
         <p className="break-words text-base text-foreground/80 md:text-lg">System Rating: {formatValue(metadata.systemRating)}</p>
         <p className="break-words text-base text-foreground/80 md:text-lg">Perfection Score: {formatValue(metadata.perfectionScore)}</p>
       </div>
 
       <div className="min-w-0 border border-border bg-[#f8f6f1] p-4 shadow-[0_2px_5px_#0003]">
-        <h4 className="mb-3 text-center text-xl tracking-[0.06em] text-foreground/80 uppercase md:text-left">Style</h4>
+        <h4 className="mb-3 text-left text-lg tracking-[0.06em] text-foreground/80 uppercase">Style</h4>
         <p className="break-words text-base text-foreground/80 md:text-lg">Mode: {formatValue(metadata.lightMode)}</p>
         <p className="break-words text-base text-foreground/80 md:text-lg">Color Theme: {formatValue(metadata.colorTheme)}</p>
         <p className="break-words text-base text-foreground/80 md:text-lg">Line Type: {formatValue(metadata.lineTypeString)}</p>
       </div>
 
       <div className="min-w-0 border border-border bg-[#f8f6f1] p-4 shadow-[0_2px_5px_#0003]">
-        <h4 className="mb-3 text-center text-xl tracking-[0.06em] text-foreground/80 uppercase md:text-left">Period</h4>
+        <h4 className="mb-3 text-left text-lg tracking-[0.06em] text-foreground/80 uppercase">Period</h4>
         <p className="break-words text-base text-foreground/80 md:text-lg">Period Ratio: {formatValue(metadata.periodRatioString)}</p>
         <p className="break-words text-base text-foreground/80 md:text-lg">Period Offset: {formatValue(metadata.periodOffset)}</p>
       </div>
 
       <div className="min-w-0 border border-border bg-[#f8f6f1] p-4 shadow-[0_2px_5px_#0003]">
-        <h4 className="mb-3 text-center text-xl tracking-[0.06em] text-foreground/80 uppercase md:text-left">Amplitude</h4>
+        <h4 className="mb-3 text-left text-lg tracking-[0.06em] text-foreground/80 uppercase">Amplitude</h4>
         <p className="break-words text-base text-foreground/80 md:text-lg">Amplitude X: {formatValue(metadata.amplitudeX)}</p>
         <p className="break-words text-base text-foreground/80 md:text-lg">Amplitude Y: {formatValue(metadata.amplitudeY)}</p>
       </div>
 
       <div className="min-w-0 border border-border bg-[#f8f6f1] p-4 shadow-[0_2px_5px_#0003]">
-        <h4 className="mb-3 text-center text-xl tracking-[0.06em] text-foreground/80 uppercase md:text-left">Damping</h4>
+        <h4 className="mb-3 text-left text-lg tracking-[0.06em] text-foreground/80 uppercase">Damping</h4>
         <p className="break-words text-base text-foreground/80 md:text-lg">Damping X: {formatValue(metadata.dampingX)}</p>
         <p className="break-words text-base text-foreground/80 md:text-lg">Damping Y: {formatValue(metadata.dampingY)}</p>
       </div>
 
       <div className="min-w-0 border border-border bg-[#f8f6f1] p-4 shadow-[0_2px_5px_#0003]">
-        <h4 className="mb-3 text-center text-xl tracking-[0.06em] text-foreground/80 uppercase md:text-left">Cycle</h4>
+        <h4 className="mb-3 text-left text-lg tracking-[0.06em] text-foreground/80 uppercase">Cycle</h4>
         <p className="break-words text-base text-foreground/80 md:text-lg">Cycle Count: {formatValue(metadata.cycleCount)}</p>
         <p className="break-words text-base text-foreground/80 md:text-lg">Swing Time (sec): {formatValue(metadata.runtime)}</p>
       </div>
@@ -204,7 +204,7 @@ export function PendulumsSystemSection() {
         <span className="h-[2px] w-16 md:w-60 bg-gradient-to-l from-transparent to-foreground/40" />
       </div>
 
-      <p className="mx-auto content-width mb-6 text-left text-base leading-8 text-foreground md:mb-8 md:text-lg">
+      <p className="mx-auto content-width mb-6 text-center text-base leading-8 text-foreground md:mb-8 md:text-left md:text-lg">
         This is the engine behind every piece in the collection. Each time you click Generate, a new system comes to
         life, just like it will during the actual mint. <strong>Click</strong> the artwork to watch the pendulum draw
         itself, stroke by stroke, in real time. You&apos;ll also find each generated artwork&apos;s output profile: a
@@ -250,7 +250,7 @@ export function PendulumsSystemSection() {
           <button
             type="button"
             onClick={runSystem}
-            className="mt-4 border border-[#333] px-5 py-3 text-2xl text-foreground/80 transition-colors hover:bg-black/5"
+            className="mt-4 border border-[#333] px-5 py-3 text-lg text-foreground/80 transition-colors hover:bg-black/5"
           >
             Run the System
           </button>
