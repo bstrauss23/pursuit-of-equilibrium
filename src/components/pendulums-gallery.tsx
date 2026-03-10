@@ -839,7 +839,7 @@ export function PendulumsGallery() {
       const tweetText = encodeURIComponent(
         `My Pendulums grid by @benstraussphoto`
       );
-      window.location.href = `https://twitter.com/intent/tweet?text=${tweetText}`;
+      window.open(`https://x.com/intent/tweet?text=${tweetText}`, "_blank");
     } catch (error) {
       setGridExportError(error instanceof Error ? error.message : "Share failed.");
     } finally {
