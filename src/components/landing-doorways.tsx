@@ -64,8 +64,8 @@ export function LandingDoorways() {
           />
           <div className="absolute inset-0 bg-black/45" />
           <div className="relative z-10 space-y-3">
-            <p className="text-base tracking-[0.2em] text-zinc-300 uppercase md:text-lg">Chapter 1</p>
-            <h2 className="text-6xl tracking-[0.12em] text-white transition-all duration-500 ease-out group-hover:tracking-[0.30em]">
+            <p className="text-sm tracking-[0.2em] text-zinc-300 uppercase md:text-lg">Chapter 1</p>
+            <h2 className="text-4xl tracking-[0.12em] text-white transition-all duration-500 ease-out group-hover:tracking-[0.30em]">
               LUX
             </h2>
           </div>
@@ -84,8 +84,8 @@ export function LandingDoorways() {
           />
           <div className="absolute inset-0 bg-white/45" />
           <div className="relative z-10 space-y-3">
-            <p className="text-base tracking-[0.2em] text-zinc-600 uppercase md:text-lg">Chapter 2</p>
-            <h2 className="text-6xl tracking-[0.12em] text-zinc-900 transition-all duration-500 ease-out group-hover:tracking-[0.2em]">
+            <p className="text-sm tracking-[0.2em] text-zinc-600 uppercase md:text-lg">Chapter 2</p>
+            <h2 className="text-4xl tracking-[0.12em] text-zinc-900 transition-all duration-500 ease-out group-hover:tracking-[0.2em]">
               PENDULUMS
             </h2>
           </div>
