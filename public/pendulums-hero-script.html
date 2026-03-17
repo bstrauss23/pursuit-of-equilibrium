@@ -87,6 +87,9 @@
         let texturesReady = false;
         let sceneReady = false;
         const HERO_MAX_POINTS = 8000;
+        const HERO_TEXTURE_START_DELAY_MS = 1800;
+        let textureBuildTimeoutId = null;
+        let textureBuildIdleId = null;
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +123,7 @@
             const deviceDensity = window.devicePixelRatio || 1;
             // In cover mode canvasSize is based on max(viewport), so derive texture density
             // from display density instead of canvasSize to avoid muddy grain.
-            pixelDensityValue = 2
+            pixelDensityValue = 1
             ellipseSize = canvasSize / 200;
             if (parseFloat((canvasSize / 1200).toFixed(1)) < 0.75) {
                 strokeSize = 0.75;
@@ -313,22 +316,17 @@
             paperTexture.pixelDensity(pixelDensityValue);
             pencilTexture = createGraphics(textureWidth, textureHeight);
             pencilTexture.pixelDensity(pixelDensityValue);
-            const buildTextures = () => {
-                generatePaperTexture();
-                generatePencilTexture();
-                texturesReady = true;
-                sceneReady = true;
-                if (!animateDrawing) {
-                    drawTrace();
-                    redraw();
-                    return;
-                }
-                loop();
-            };
-            setTimeout(buildTextures, 0);
 
             //// Calculate trace array with all x and y coordinates
             calculateTrace();
+            sceneReady = true;
+            if (!animateDrawing) {
+                drawTrace();
+                redraw();
+            } else {
+                loop();
+            }
+            scheduleTextureBuild();
         }
 
 
@@ -476,6 +474,37 @@
                 }
             }
             pencilTexture.updatePixels();
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+
+        // Build heavy texture layers only during idle time so startup input stays responsive.
+        function scheduleTextureBuild() {
+            const buildTextures = () => {
+                if (texturesReady) return;
+                generatePaperTexture();
+                generatePencilTexture();
+                texturesReady = true;
+                if (!animateDrawing) {
+                    drawTrace();
+                    redraw();
+                }
+            };
+
+            const startBuild = () => {
+                textureBuildIdleId = null;
+                buildTextures();
+            };
+
+            const queueIdleBuild = () => {
+                if ("requestIdleCallback" in window) {
+                    textureBuildIdleId = window.requestIdleCallback(startBuild, { timeout: 2800 });
+                    return;
+                }
+                textureBuildTimeoutId = setTimeout(startBuild, 200);
+            };
+
+            textureBuildTimeoutId = setTimeout(queueIdleBuild, HERO_TEXTURE_START_DELAY_MS);
         }
 
         /////////////////////////////////////////////////////////////////////////
