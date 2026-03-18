@@ -4,9 +4,17 @@ const DEFAULT_SITE_NAME = "Pursuit of Equilibrium";
 const DEFAULT_IMAGE = "/poe-logo-1024.jpg";
 
 export function getSiteUrl(): URL {
-  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    process.env.VERCEL_URL;
   if (configuredUrl) {
-    return new URL(configuredUrl);
+    if (configuredUrl.startsWith("http://") || configuredUrl.startsWith("https://")) {
+      return new URL(configuredUrl);
+    }
+
+    return new URL(`https://${configuredUrl}`);
   }
 
   return new URL("http://localhost:3000");
