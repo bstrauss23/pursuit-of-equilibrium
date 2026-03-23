@@ -113,8 +113,8 @@ function LuxGridImage({ item }: { item: LuxGridItem }) {
       alt={item.name}
       width={dimensions.width}
       height={dimensions.height}
-      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-      quality={65}
+      sizes="(max-width: 768px) 42vw, (max-width: 1280px) 34vw, 28vw"
+      quality={45}
       loading="lazy"
       className="h-auto w-full"
       onError={handleError}
@@ -144,8 +144,8 @@ function LuxDrawerImage({ item }: { item: LuxGridItem }) {
       alt={item.name}
       width={dimensions.width}
       height={dimensions.height}
-      sizes="(max-width: 768px) 100vw, 50vw"
-      quality={80}
+      sizes="(max-width: 768px) 64vw, 38vw"
+      quality={60}
       loading="eager"
       className="h-auto max-h-[45vh] w-auto max-w-full object-contain md:max-h-[70vh]"
       onError={handleError}
@@ -327,11 +327,14 @@ export default function LuxPage() {
                   muted
                   loop
                   playsInline
+                  preload="metadata"
                   className="h-auto w-1/2 rounded-md object-cover"
                 />
                 <img
                   src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/original-grid.jpeg"
                   alt="Original pendulum grid"
+                  loading="lazy"
+                  decoding="async"
                   className="h-auto w-1/2 rounded-md object-cover"
                 />
               </div>
@@ -359,6 +362,7 @@ export default function LuxPage() {
                 muted
                 loop
                 playsInline
+                preload="metadata"
                 className="w-full rounded-md"
               />
             </Figure>
@@ -384,6 +388,8 @@ export default function LuxPage() {
               <img
                 src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/diagram-2.jpg"
                 alt="A diagram comparing simple pendulum system and Blackburn pendulum system"
+                loading="lazy"
+                decoding="async"
                 className="w-full rounded-md"
               />
             </Figure>
@@ -419,6 +425,7 @@ export default function LuxPage() {
                 loop
                 playsInline
                 controls
+                preload="metadata"
                 className="w-full rounded-md"
               />
             </Figure>
@@ -469,6 +476,8 @@ export default function LuxPage() {
                     key={src}
                     src={`http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/${src}`}
                     alt={alt}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full rounded-md md:h-64 md:w-auto"
                   />
                 ))}
@@ -485,11 +494,15 @@ export default function LuxPage() {
                 <img
                   src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/lux-pendulum-1.jpeg"
                   alt="A Lux light painting"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full rounded-md object-cover"
                 />
                 <img
                   src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/lux-pendulum-2.jpg"
                   alt="A Pendulum output of the same mode"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full rounded-md object-cover"
                 />
               </div>
