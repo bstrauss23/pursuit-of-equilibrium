@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { EthereumShim } from "@/components/ethereum-shim";
 import { getSiteUrl } from "@/lib/metadata";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body
         className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} min-h-screen antialiased`}
       >
+        <EthereumShim />
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <main className="mx-auto w-full flex-1 px-4 pt-24 pb-8 md:px-6">
