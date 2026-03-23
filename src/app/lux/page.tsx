@@ -113,8 +113,8 @@ function LuxGridImage({ item }: { item: LuxGridItem }) {
       alt={item.name}
       width={dimensions.width}
       height={dimensions.height}
-      sizes="(max-width: 768px) 42vw, (max-width: 1280px) 34vw, 28vw"
-      quality={45}
+      sizes="(max-width: 768px) 34vw, (max-width: 1280px) 30vw, 24vw"
+      quality={35}
       loading="lazy"
       className="h-auto w-full"
       onError={handleError}
@@ -144,8 +144,8 @@ function LuxDrawerImage({ item }: { item: LuxGridItem }) {
       alt={item.name}
       width={dimensions.width}
       height={dimensions.height}
-      sizes="(max-width: 768px) 48vw, 30vw"
-      quality={50}
+      sizes="(max-width: 768px) 36vw, 24vw"
+      quality={40}
       loading="lazy"
       className="h-auto max-h-[45vh] w-auto max-w-full object-contain md:max-h-[70vh]"
       onError={handleError}
@@ -187,9 +187,18 @@ function splitIntoColumns<T>(items: T[], columns: number): T[][] {
   return groups;
 }
 
+function MobileMediaFallback() {
+  return (
+    <div className="rounded-md border border-zinc-700/60 bg-zinc-900/45 px-4 py-5 text-sm text-zinc-300">
+      Media is disabled on mobile for stability. It remains available on desktop.
+    </div>
+  );
+}
+
 export default function LuxPage() {
   const [activeItem, setActiveItem] = useState<LuxGridItem | null>(null);
   const [columnCount, setColumnCount] = useState(2);
+  const [showFullAboutMedia, setShowFullAboutMedia] = useState(true);
 
   useEffect(() => {
     const prevBodyBg = document.body.style.backgroundColor;
@@ -229,6 +238,19 @@ export default function LuxPage() {
     window.addEventListener("resize", updateColumnCount, { passive: true });
     return () => {
       window.removeEventListener("resize", updateColumnCount);
+    };
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(pointer: coarse), (max-width: 768px)");
+    const updateMediaMode = () => {
+      setShowFullAboutMedia(!mediaQuery.matches);
+    };
+
+    updateMediaMode();
+    mediaQuery.addEventListener("change", updateMediaMode);
+    return () => {
+      mediaQuery.removeEventListener("change", updateMediaMode);
     };
   }, []);
 
@@ -309,24 +331,26 @@ export default function LuxPage() {
             <p>What appears as a drawing is actually the trace of a real physical system moving toward equilibrium.</p>
 
             <Figure caption="A video of the earliest pendulum rig built from string, duct tape, aluminum foil, and a cheap flashlight. This rig was a simple pendulum system.">
-              <div className="flex gap-3">
-                <video
-                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/original-rig.mp4"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  className="h-auto w-1/2 rounded-md object-cover"
-                />
-                <img
-                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/original-grid.jpeg"
-                  alt="Original pendulum grid"
-                  loading="lazy"
-                  decoding="async"
-                  className="h-auto w-1/2 rounded-md object-cover"
-                />
-              </div>
+              {showFullAboutMedia ? (
+                <div className="flex gap-3">
+                  <video
+                    src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/original-rig.mp4"
+                    playsInline
+                    controls
+                    preload="none"
+                    className="h-auto w-1/2 rounded-md object-cover"
+                  />
+                  <img
+                    src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/original-grid.jpeg"
+                    alt="Original pendulum grid"
+                    loading="lazy"
+                    decoding="async"
+                    className="h-auto w-1/2 rounded-md object-cover"
+                  />
+                </div>
+              ) : (
+                <MobileMediaFallback />
+              )}
             </Figure>
 
             <h3 className="pt-8 text-2xl tracking-[0.08em]">MAKING MOTION VISIBLE</h3>
@@ -345,15 +369,17 @@ export default function LuxPage() {
             <p>Lux was an attempt to capture these hidden patterns directly from the physical world.</p>
 
             <Figure caption="A video showing the long exposure capture process of the Blackburn pendulum. The rig in this video was one of the earlier test rigs.">
-              <video
-                src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/long-exposure-example.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                className="w-full rounded-md"
-              />
+              {showFullAboutMedia ? (
+                <video
+                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/long-exposure-example.mp4"
+                  playsInline
+                  controls
+                  preload="none"
+                  className="w-full rounded-md"
+                />
+              ) : (
+                <MobileMediaFallback />
+              )}
             </Figure>
 
             <h3 className="pt-8 text-2xl tracking-[0.08em]">FROM SIMPLE PENDULUM TO BLACKBURN PENDULUM</h3>
@@ -374,13 +400,17 @@ export default function LuxPage() {
             </p>
 
             <Figure caption="A diagram comparing simple pendulum system and Blackburn pendulum system.">
-              <img
-                src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/diagram-2.jpg"
-                alt="A diagram comparing simple pendulum system and Blackburn pendulum system"
-                loading="lazy"
-                decoding="async"
-                className="w-full rounded-md"
-              />
+              {showFullAboutMedia ? (
+                <img
+                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/diagram-2.jpg"
+                  alt="A diagram comparing simple pendulum system and Blackburn pendulum system"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full rounded-md"
+                />
+              ) : (
+                <MobileMediaFallback />
+              )}
             </Figure>
 
             <h3 className="pt-8 text-2xl tracking-[0.08em]">BUILDING THE RIG</h3>
@@ -407,16 +437,17 @@ export default function LuxPage() {
             </p>
 
             <Figure caption="A timelapse build of the main Blackburn pendulum used to create the Lux artworks.">
-              <video
-                src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/making-of-blackburn.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                controls
-                preload="metadata"
-                className="w-full rounded-md"
-              />
+              {showFullAboutMedia ? (
+                <video
+                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/making-of-blackburn.mp4"
+                  playsInline
+                  controls
+                  preload="none"
+                  className="w-full rounded-md"
+                />
+              ) : (
+                <MobileMediaFallback />
+              )}
             </Figure>
 
             <h3 className="pt-8 text-2xl tracking-[0.08em]">THE LUX COLLECTION</h3>
@@ -454,23 +485,27 @@ export default function LuxPage() {
             </p>
 
             <Figure caption="The four bidder's editions given away during the Lux auctions. There was one for Lux No. 1, 2, 3 and 7.">
-              <div className="grid grid-cols-2 gap-3 md:flex md:flex-wrap">
-                {[
-                  { src: "tempus.jpeg", alt: "Tempus" },
-                  { src: "motu.jpeg", alt: "Motu" },
-                  { src: "Clepsydra.jpeg", alt: "Clepsydra" },
-                  { src: "kinesis.gif", alt: "Kinesis" },
-                ].map(({ src, alt }) => (
-                  <img
-                    key={src}
-                    src={`http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/${src}`}
-                    alt={alt}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full rounded-md md:h-64 md:w-auto"
-                  />
-                ))}
-              </div>
+              {showFullAboutMedia ? (
+                <div className="grid grid-cols-2 gap-3 md:flex md:flex-wrap">
+                  {[
+                    { src: "tempus.jpeg", alt: "Tempus" },
+                    { src: "motu.jpeg", alt: "Motu" },
+                    { src: "Clepsydra.jpeg", alt: "Clepsydra" },
+                    { src: "kinesis.gif", alt: "Kinesis" },
+                  ].map(({ src, alt }) => (
+                    <img
+                      key={src}
+                      src={`http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/${src}`}
+                      alt={alt}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full rounded-md md:h-64 md:w-auto"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <MobileMediaFallback />
+              )}
             </Figure>
 
             <h3 className="pt-8 text-2xl tracking-[0.08em]">A BEGINNING</h3>
@@ -479,22 +514,26 @@ export default function LuxPage() {
             <p>That evolution became Chapter II: Pendulums.</p>
 
             <Figure caption="A side-by-side comparison showing a Lux light painting and a Pendulum output of the same mode.">
-              <div className="grid grid-cols-2 gap-3">
-                <img
-                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/lux-pendulum-1.jpeg"
-                  alt="A Lux light painting"
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full rounded-md object-cover"
-                />
-                <img
-                  src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/lux-pendulum-2.jpg"
-                  alt="A Pendulum output of the same mode"
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full rounded-md object-cover"
-                />
-              </div>
+              {showFullAboutMedia ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <img
+                    src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/lux-pendulum-1.jpeg"
+                    alt="A Lux light painting"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full rounded-md object-cover"
+                  />
+                  <img
+                    src="http://cdn.transientlabs.xyz/tlx/pendulums/website-assets/lux-pendulum-2.jpg"
+                    alt="A Pendulum output of the same mode"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full rounded-md object-cover"
+                  />
+                </div>
+              ) : (
+                <MobileMediaFallback />
+              )}
             </Figure>
           </div>
         </article>
