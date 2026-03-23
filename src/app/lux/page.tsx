@@ -144,9 +144,9 @@ function LuxDrawerImage({ item }: { item: LuxGridItem }) {
       alt={item.name}
       width={dimensions.width}
       height={dimensions.height}
-      sizes="(max-width: 768px) 64vw, 38vw"
-      quality={60}
-      loading="eager"
+      sizes="(max-width: 768px) 48vw, 30vw"
+      quality={50}
+      loading="lazy"
       className="h-auto max-h-[45vh] w-auto max-w-full object-contain md:max-h-[70vh]"
       onError={handleError}
     />
@@ -189,6 +189,7 @@ function splitIntoColumns<T>(items: T[], columns: number): T[][] {
 
 export default function LuxPage() {
   const [activeItem, setActiveItem] = useState<LuxGridItem | null>(null);
+  const [columnCount, setColumnCount] = useState(2);
 
   useEffect(() => {
     const prevBodyBg = document.body.style.backgroundColor;
@@ -216,6 +217,18 @@ export default function LuxPage() {
       } else {
         document.documentElement.style.removeProperty("--button-hover-bg");
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    function updateColumnCount() {
+      setColumnCount(window.innerWidth >= 1280 ? 3 : 2);
+    }
+
+    updateColumnCount();
+    window.addEventListener("resize", updateColumnCount, { passive: true });
+    return () => {
+      window.removeEventListener("resize", updateColumnCount);
     };
   }, []);
 
@@ -255,44 +268,20 @@ export default function LuxPage() {
           <h3 className="text-base tracking-[0.08em] text-zinc-300 md:text-lg">by BEN STRAUSS</h3>
         </div>
 
-        <div className="w-full max-w-[1400px] md:hidden">
-          <div className="grid grid-cols-2 gap-3">
-            {luxItems.map((item) => (
-              <LuxCard
-                key={`sm-${item.name}`}
-                item={item}
-                onSelect={handleCardSelect}
-              />
+        <div className="w-full max-w-[1400px]">
+          <div className="flex gap-3 md:gap-5">
+            {splitIntoColumns(luxItems, columnCount).map((column, columnIndex) => (
+              <div key={`lux-col-${columnIndex}`} className="min-w-0 flex-1 space-y-3 md:space-y-5">
+                {column.map((item) => (
+                  <LuxCard
+                    key={`lux-${item.name}`}
+                    item={item}
+                    onSelect={handleCardSelect}
+                  />
+                ))}
+              </div>
             ))}
           </div>
-        </div>
-
-        <div className="hidden w-full max-w-[1400px] gap-5 md:flex xl:hidden">
-          {splitIntoColumns(luxItems, 2).map((column, columnIndex) => (
-            <div key={`md-col-${columnIndex}`} className="flex-1 space-y-5">
-              {column.map((item) => (
-                <LuxCard
-                  key={`md-${item.name}`}
-                  item={item}
-                  onSelect={handleCardSelect}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-
-        <div className="hidden w-full max-w-[1400px] gap-5 xl:flex">
-          {splitIntoColumns(luxItems, 3).map((column, columnIndex) => (
-            <div key={`xl-col-${columnIndex}`} className="flex-1 space-y-5">
-              {column.map((item) => (
-                <LuxCard
-                  key={`xl-${item.name}`}
-                  item={item}
-                  onSelect={handleCardSelect}
-                />
-              ))}
-            </div>
-          ))}
         </div>
 
         <div aria-hidden className="my-[calc(var(--section-gap)/2)] w-full px-4 md:px-6">
