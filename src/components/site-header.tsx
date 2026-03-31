@@ -30,6 +30,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const showNav = pathname !== "/";
   const isLuxRoute = pathname.startsWith("/lux");
+  const isDarkStyledRoute = isLuxRoute || pathname.startsWith("/prologue");
   const navItems = isLuxRoute ? luxNavItems : defaultNavItems;
   const [hash, setHash] = useState("");
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -69,7 +70,7 @@ export function SiteHeader() {
   return (
     <header
       className={`fixed top-0 right-0 left-0 z-50 border-b backdrop-blur ${
-        isLuxRoute ? "border-white/10 bg-[#121315]/88" : "border-border bg-background/95"
+        isDarkStyledRoute ? "border-white/10 bg-[#121315]/88" : "border-border bg-background/95"
       }`}
     >
       <div
@@ -80,7 +81,7 @@ export function SiteHeader() {
         <Link
           href="/"
           className={`flex items-center gap-3 text-lg font-semibold tracking-wide uppercase ${
-            isLuxRoute ? "text-zinc-200" : ""
+            isDarkStyledRoute ? "text-zinc-200" : ""
           }`}
         >
           <Image
@@ -103,7 +104,7 @@ export function SiteHeader() {
                   href={item.href}
                   onClick={(event) => onNavClick(event, item.href)}
                   className={`text-lg transition-colors hover:text-foreground ${
-                    isLuxRoute
+                    isDarkStyledRoute
                       ? isActiveHref(item.href)
                         ? "text-zinc-100 underline underline-offset-4"
                         : "text-zinc-400 hover:text-zinc-200"
@@ -123,7 +124,7 @@ export function SiteHeader() {
                 aria-label="Open navigation menu"
                 onClick={() => setIsMobileNavOpen(true)}
                 className={`inline-flex items-center justify-center rounded-sm border p-2 md:hidden ${
-                  isLuxRoute
+                  isDarkStyledRoute
                     ? "border-zinc-700 bg-zinc-900/70 text-zinc-100"
                     : "border-border bg-background text-foreground"
                 }`}
@@ -132,7 +133,7 @@ export function SiteHeader() {
               </button>
               <DrawerContent
                 className={`md:hidden ${
-                  isLuxRoute ? "border-zinc-700 bg-[#17181b] text-zinc-100" : "border-border bg-background"
+                  isDarkStyledRoute ? "border-zinc-700 bg-[#17181b] text-zinc-100" : "border-border bg-background"
                 }`}
               >
                 <nav className="flex flex-col gap-1 p-4 pt-6">
@@ -142,7 +143,7 @@ export function SiteHeader() {
                         href={item.href}
                         onClick={(event) => onNavClick(event, item.href)}
                         className={`rounded-sm border px-3 py-2 text-base ${
-                          isLuxRoute
+                          isDarkStyledRoute
                             ? isActiveHref(item.href)
                               ? "border-zinc-500 bg-zinc-800 text-zinc-100"
                               : "border-zinc-700 bg-zinc-900 text-zinc-300"
