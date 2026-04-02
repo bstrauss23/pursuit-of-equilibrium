@@ -39,7 +39,7 @@ export default function ProloguePage() {
               <h1 className="text-4xl tracking-[0.2em] text-zinc-100 md:text-8xl">FIRST CONTACT</h1>
             </div>
             <h2 className="text-lg tracking-[0.08em] text-zinc-200 md:text-2xl">
-              A MOCK EDITION MINT INTERFACE
+              Night One
             </h2>
             <h3 className="text-base tracking-[0.08em] text-zinc-300 md:text-lg">by BEN STRAUSS</h3>
           </div>

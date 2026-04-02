@@ -293,6 +293,7 @@ export function PendulumsGallery() {
   const [isGridDragging, setIsGridDragging] = useState(false);
   const [draggingTileIndex, setDraggingTileIndex] = useState<number | null>(null);
   const [dragGhostPosition, setDragGhostPosition] = useState<{ x: number; y: number } | null>(null);
+  const [activeAnimationSrc, setActiveAnimationSrc] = useState("");
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const gridPreviewFrameRef = useRef<HTMLDivElement | null>(null);
@@ -300,6 +301,7 @@ export function PendulumsGallery() {
   const dragCurrentPositionRef = useRef<{ x: number; y: number } | null>(null);
   const dragPointerOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const dragAnimationFrameRef = useRef<number | null>(null);
+  const iframeLoadTimeoutRef = useRef<number | null>(null);
   const query = search.trim().toLowerCase();
   const listedSortLabel =
     LISTED_PRICE_SORT_OPTIONS.find((option) => option.value === listedPriceSort)?.label ?? "Sort by price";
@@ -468,6 +470,39 @@ export function PendulumsGallery() {
       window.clearInterval(intervalId);
     };
   }, [fetchListings]);
+
+  const clearIframeLoadTimeout = useCallback(() => {
+    if (iframeLoadTimeoutRef.current !== null) {
+      window.clearTimeout(iframeLoadTimeoutRef.current);
+      iframeLoadTimeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    clearIframeLoadTimeout();
+
+    if (!activeItem?.animation_url) {
+      setActiveAnimationSrc("");
+      return;
+    }
+
+    const nextSrc = activeItem.animation_url;
+    setActiveAnimationSrc("");
+    const rafId = window.requestAnimationFrame(() => {
+      setActiveAnimationSrc(nextSrc);
+    });
+
+    iframeLoadTimeoutRef.current = window.setTimeout(() => {
+      const fallbackUrl = toIpfsFallbackUrl(nextSrc);
+      if (!fallbackUrl) return;
+      setActiveAnimationSrc(fallbackUrl);
+    }, 6000);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      clearIframeLoadTimeout();
+    };
+  }, [activeItem, clearIframeLoadTimeout]);
 
   const activeListing = activeItem ? listingByTokenId[activeItem.token_id] ?? null : null;
 
@@ -1421,12 +1456,23 @@ export function PendulumsGallery() {
                 <div className="space-y-3">
                   {activeItem.animation_url ? (
                     <div className="relative aspect-square min-h-[320px] w-full border border-border">
-                      <iframe
-                        src={activeItem.animation_url}
-                        title={activeItem.name}
-                        onError={handleIpfsIframeError}
-                        className="absolute inset-0 h-full w-full border-0"
-                      />
+                      {activeAnimationSrc ? (
+                        <iframe
+                          key={`${activeItem.token_id}:${activeAnimationSrc}`}
+                          src={activeAnimationSrc}
+                          title={activeItem.name}
+                          onLoad={clearIframeLoadTimeout}
+                          onError={(event) => {
+                            clearIframeLoadTimeout();
+                            handleIpfsIframeError(event);
+                          }}
+                          className="absolute inset-0 h-full w-full border-0"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-background">
+                          <Spinner className="size-5" />
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="relative aspect-square min-h-[320px] w-full border border-border">
