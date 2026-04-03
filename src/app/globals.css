@@ -154,8 +154,14 @@
     transition: background-color 160ms ease, border-color 160ms ease;
   }
 
-  button:not(:disabled):hover:not([data-slot="checkbox"]):not([data-slot="switch"]) {
+  button:not(:disabled):hover:not([data-slot="checkbox"]):not([data-slot="switch"]):not(.no-hover-fill) {
     background-color: var(--button-hover-bg) !important;
+  }
+
+  button.no-hover-fill:not(:disabled):hover,
+  button.no-hover-fill:not(:disabled):active,
+  button.no-hover-fill:focus-visible {
+    background-color: transparent !important;
   }
 }
 
@@ -257,6 +263,20 @@
   transform: translate(-50%, -50%);
   animation: doorway-mobile-pendulum-travel 8s ease-in-out infinite;
   will-change: top;
+}
+
+@keyframes current-phase-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.1;
+  }
+}
+
+.current-phase-pulse {
+  animation: current-phase-pulse 2s linear infinite;
 }
 
 .doorway-mobile-pendulum-bob {

@@ -31,7 +31,7 @@ const GENESIS_ARTWORKS: GenesisArtwork[] = [
     subtitle: "Prologue: First Contact",
     src: "/genesis-art/genesis-2.jpeg",
     initialPhaseNumber: 2,
-    initialCommittedCollectors: 1,
+    initialCommittedCollectors: 0,
   },
   {
     id: 3,
@@ -125,7 +125,7 @@ export function PrologueMintGallery() {
         <DialogContent
           size="auto"
           showCloseButton
-          className="w-[min(1400px,96vw)] max-h-[92vh] overflow-hidden border border-zinc-700 bg-[#17181b] p-4 text-zinc-100 shadow-[0_18px_60px_rgba(0,0,0,0.6)] md:p-6"
+          className="w-[min(1400px,96vw)] max-h-[92vh] overflow-y-auto md:overflow-hidden border border-zinc-700 bg-[#17181b] p-4 text-zinc-100 shadow-[0_18px_60px_rgba(0,0,0,0.6)] md:p-6"
         >
           {selectedArtwork ? (
             <>

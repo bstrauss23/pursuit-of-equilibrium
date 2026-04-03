@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { EthereumShim } from "@/components/ethereum-shim";
+import { Toaster } from "@/components/ui/sonner";
 import { getSiteUrl } from "@/lib/metadata";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -45,6 +46,7 @@ export default function RootLayout({
           </main>
           <SiteFooter />
         </div>
+        <Toaster position="bottom-center" richColors />
       </body>
     </html>
   );

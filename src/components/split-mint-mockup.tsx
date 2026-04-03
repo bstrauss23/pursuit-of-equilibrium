@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 type SplitMintMockupProps = {
   artworkSrc: string;
@@ -107,7 +109,7 @@ function TreeRow({
   className?: string;
 }) {
   const width = 920;
-  const boxSize = count <= 2 ? 70 : count <= 4 ? 54 : count <= 8 ? 38 : count <= 16 ? 26 : count <= 32 ? 16 : 10;
+  const boxSize = count === 1 ? 82 : count <= 2 ? 70 : count <= 4 ? 54 : count <= 8 ? 38 : count <= 16 ? 26 : count <= 32 ? 16 : 10;
   const boxY = 46;
   const lineY = boxY - 22;
   const sidePadding = boxSize / 2 + 12;
@@ -120,59 +122,61 @@ function TreeRow({
 
   return (
     <svg viewBox={`0 0 ${width} 190`} className={`w-full ${rowOpacityClass} ${className ?? ""}`} aria-hidden>
-      {showTopStub && SHOW_TREE_CONNECTORS ? (
-        <line
-          x1={overallCenter}
-          y1={2}
-          x2={overallCenter}
-          y2={lineY - 24}
-          stroke="rgba(245,245,245,0.45)"
-          strokeWidth="2"
-          strokeDasharray="5 4"
-        />
-      ) : null}
-
-      {count === 1 && showTopStub && SHOW_TREE_CONNECTORS ? (
-        <line x1={overallCenter} y1={lineY - 12} x2={overallCenter} y2={boxY} stroke="rgba(245,245,245,0.4)" strokeWidth="2" />
-      ) : null}
-
-      {count > 1 && SHOW_TREE_CONNECTORS ? (
-        <g>
-          <line
-            x1={centers[0] ?? overallCenter}
-            y1={lineY}
-            x2={centers[centers.length - 1] ?? overallCenter}
-            y2={lineY}
-            stroke="rgba(245,245,245,0.55)"
-            strokeWidth="2"
-          />
+      <g>
+        {showTopStub && SHOW_TREE_CONNECTORS ? (
           <line
             x1={overallCenter}
-            y1={lineY - 36}
+            y1={2}
             x2={overallCenter}
-            y2={lineY}
-            stroke="rgba(245,245,245,0.55)"
+            y2={lineY - 24}
+            stroke="rgba(245,245,245,0.45)"
             strokeWidth="2"
             strokeDasharray="5 4"
           />
-          <line
-            x1={centers[0] ?? overallCenter}
-            y1={lineY}
-            x2={centers[0] ?? overallCenter}
-            y2={boxY - 6}
-            stroke="rgba(245,245,245,0.55)"
-            strokeWidth="2"
-          />
-          <line
-            x1={centers[centers.length - 1] ?? overallCenter}
-            y1={lineY}
-            x2={centers[centers.length - 1] ?? overallCenter}
-            y2={boxY - 6}
-            stroke="rgba(245,245,245,0.55)"
-            strokeWidth="2"
-          />
-        </g>
-      ) : null}
+        ) : null}
+
+        {count === 1 && showTopStub && SHOW_TREE_CONNECTORS ? (
+          <line x1={overallCenter} y1={lineY - 12} x2={overallCenter} y2={boxY} stroke="rgba(245,245,245,0.4)" strokeWidth="2" />
+        ) : null}
+
+        {count > 1 && SHOW_TREE_CONNECTORS ? (
+          <g>
+            <line
+              x1={centers[0] ?? overallCenter}
+              y1={lineY}
+              x2={centers[centers.length - 1] ?? overallCenter}
+              y2={lineY}
+              stroke="rgba(245,245,245,0.55)"
+              strokeWidth="2"
+            />
+            <line
+              x1={overallCenter}
+              y1={lineY - 36}
+              x2={overallCenter}
+              y2={lineY}
+              stroke="rgba(245,245,245,0.55)"
+              strokeWidth="2"
+              strokeDasharray="5 4"
+            />
+            <line
+              x1={centers[0] ?? overallCenter}
+              y1={lineY}
+              x2={centers[0] ?? overallCenter}
+              y2={boxY - 6}
+              stroke="rgba(245,245,245,0.55)"
+              strokeWidth="2"
+            />
+            <line
+              x1={centers[centers.length - 1] ?? overallCenter}
+              y1={lineY}
+              x2={centers[centers.length - 1] ?? overallCenter}
+              y2={boxY - 6}
+              stroke="rgba(245,245,245,0.55)"
+              strokeWidth="2"
+            />
+          </g>
+        ) : null}
+      </g>
 
       {boxLeft.map((x, index) => {
         const isMinted = index < minted;
@@ -243,7 +247,10 @@ export function SplitMintMockup({
   const [isMinting, setIsMinting] = useState(false);
   const [isTreeDialogOpen, setIsTreeDialogOpen] = useState(false);
   const [isCollectorDialogOpen, setIsCollectorDialogOpen] = useState(false);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const mintTimerRef = useRef<number | null>(null);
+  const infoTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const infoTooltipRef = useRef<HTMLDivElement | null>(null);
 
   const currentSupply = PHASE_SUPPLIES[phaseIndex] ?? PHASE_SUPPLIES[PHASE_SUPPLIES.length - 1];
   const nextSupply = PHASE_SUPPLIES[phaseIndex + 1] ?? null;
@@ -251,6 +258,7 @@ export function SplitMintMockup({
   const effectiveQty = maxQty <= 0 ? 1 : Math.min(qty, maxQty);
   const unitPrice = useMemo(() => 1 / currentSupply, [currentSupply]);
   const totalPrice = useMemo(() => unitPrice * effectiveQty, [effectiveQty, unitPrice]);
+  const isPhaseClosed = mintedCount >= currentSupply;
   const canMint = maxQty > 0 && !isMinting;
   const collectors = collectorCommitments.length;
   const collectorRows = useMemo(() => {
@@ -320,6 +328,21 @@ export function SplitMintMockup({
     };
   }, []);
 
+  useEffect(() => {
+    if (!isInfoTooltipOpen) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (infoTriggerRef.current?.contains(target)) return;
+      if (infoTooltipRef.current?.contains(target)) return;
+      setIsInfoTooltipOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [isInfoTooltipOpen]);
+
   function adjustQty(direction: -1 | 1) {
     if (maxQty <= 0) return;
     setQty((current) => {
@@ -346,6 +369,7 @@ export function SplitMintMockup({
         },
       ]);
       setIsMinting(false);
+      toast.success("Mint successful!");
       mintTimerRef.current = null;
     }, 800);
   }
@@ -378,26 +402,67 @@ export function SplitMintMockup({
         <h2 className="text-4xl leading-none text-zinc-100">{artworkTitle}</h2>
         <p className="mt-2 text-base text-zinc-400">{artworkSubtitle}</p>
 
-        <section className="mt-5 border-y border-zinc-800/70 py-4">
+        <section className="mt-5 border-y border-zinc-800/70 py-8">
           <div className="mb-3 flex items-start justify-between gap-4">
             <div>
-              <p className="text-base leading-none tracking-[0.08em] text-zinc-100 uppercase">PROGRESS: PHASE {phaseIndex + 1}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-base leading-none tracking-[0.08em] text-zinc-100 uppercase">
+                  {isPhaseClosed ? "PROGRESS: Mint Closed" : `PROGRESS: PHASE ${phaseIndex + 1}`}
+                </p>
+                <TooltipProvider>
+                  <Tooltip open={isInfoTooltipOpen} onOpenChange={() => {}}>
+                    <TooltipTrigger asChild>
+                      <button
+                        ref={infoTriggerRef}
+                        type="button"
+                        tabIndex={-1}
+                        aria-label="How the split mint works"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setIsInfoTooltipOpen((current) => !current);
+                        }}
+                        className="no-hover-fill inline-flex h-4 w-4 items-center justify-center border border-zinc-100 bg-transparent text-[10px] leading-none text-zinc-100"
+                      >
+                        i
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      ref={infoTooltipRef}
+                      side="top"
+                      sideOffset={8}
+                      className="max-w-[340px] rounded-none border border-zinc-700 bg-zinc-950 text-zinc-100"
+                    >
+                      Each phase has a timer and fixed supply. If it sells out, the mint ends. If not, committed collectors
+                      carry forward and prices adjust with automatic refunds.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <p className="mt-1 text-xs tracking-[0.06em] text-zinc-400 uppercase">Edition of {currentSupply}</p>
+              {!isPhaseClosed ? (
+                <p className="mt-1 text-xs tracking-[0.06em] text-zinc-400 uppercase">Price: {formatEth(unitPrice)} ETH</p>
+              ) : null}
             </div>
-            <div className="text-right">
-              <p className="text-sm leading-none tracking-[0.04em] text-zinc-300">Phase Time Remaining:</p>
-              <p className="mt-1 text-base leading-none tabular-nums text-zinc-100">{formatTimeRemaining(timeRemaining)}</p>
-            </div>
+            {!isPhaseClosed ? (
+              <div className="text-right">
+                <p className="text-sm leading-none tracking-[0.04em] text-zinc-300">Phase Time Remaining:</p>
+                <p className="mt-1 inline-flex items-center justify-end gap-2 text-base leading-none tabular-nums text-zinc-100">
+                  <span className="current-phase-pulse inline-block h-1.5 w-1.5 bg-zinc-100" aria-hidden />
+                  <span>{formatTimeRemaining(timeRemaining)}</span>
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-8 space-y-3">
-            <TreeRow count={currentSupply} minted={mintedCount} showTopStub />
+            <p className="current-phase-pulse text-center text-xs tracking-[0.08em] text-zinc-100 uppercase">Current Phase</p>
+            <TreeRow count={currentSupply} minted={mintedCount} showTopStub={phaseIndex > 0} />
             {nextSupply ? (
-              <div className="-mt-6">
+              <div className="-mt-6 opacity-45">
                 <button
                   type="button"
                   onClick={advanceToNextPhaseForDemo}
-                  className="mx-auto block cursor-default appearance-none border-0 bg-transparent p-0 text-center text-xs tracking-[0.08em] text-zinc-400 uppercase outline-none"
+                  className="no-hover-fill mx-auto block cursor-default appearance-none border-0 bg-transparent p-0 text-center text-xs tracking-[0.08em] text-zinc-400 uppercase outline-none"
                 >
                   Next Split Phase
                 </button>
@@ -418,59 +483,85 @@ export function SplitMintMockup({
             <button
               type="button"
               onClick={() => setIsTreeDialogOpen(true)}
-              className="text-sm text-zinc-300 underline underline-offset-4 transition-colors hover:text-zinc-100"
+              className="no-hover-fill text-sm text-zinc-300 underline underline-offset-4 transition-colors hover:text-zinc-100"
             >
               view tree
             </button>
           </div>
         </section>
 
-        <section className="mt-4 grid grid-cols-[1fr_minmax(200px,0.95fr)] gap-4 rounded-none bg-[#09090b] p-4">
-          <div className="flex items-center gap-3">
-            <span className="text-lg leading-none tracking-[0.08em] text-zinc-100">Qty</span>
-            <div className="grid h-12 flex-1 grid-cols-3 overflow-hidden rounded-none border border-zinc-700 bg-zinc-900 text-center">
+        {isPhaseClosed ? (
+          <section className="mt-4 rounded-none bg-[#09090b] py-4 text-center">
+            <p className="text-lg tracking-[0.06em] text-zinc-100 uppercase">Mint Closed at Phase {phaseIndex + 1}</p>
+            <p className="mt-2 text-sm tracking-[0.06em] text-zinc-400 uppercase">Edition of {currentSupply}</p>
+          </section>
+        ) : (
+          <section className="mt-4 rounded-none bg-[#09090b] py-4">
+            <div className="flex w-full flex-col items-center gap-3 md:flex-row md:items-center md:justify-between md:gap-5">
+              <div className="flex items-center gap-3 md:flex-none">
+                <span className="text-lg leading-none tracking-[0.08em] text-zinc-100">Qty</span>
+                <div className="flex items-center gap-2 md:pr-2">
+                  <div className="relative">
+                    <div className="grid h-12 w-36 grid-cols-3 overflow-hidden rounded-none border border-zinc-700 bg-zinc-900 text-center">
+                      <button
+                        type="button"
+                        onClick={() => adjustQty(-1)}
+                        disabled={!canMint || qty <= 1}
+                        className="text-lg text-zinc-200 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:text-zinc-600"
+                        aria-label="Decrease quantity"
+                      >
+                        -
+                      </button>
+                      <div className="flex items-center justify-center border-x border-zinc-700 text-lg tabular-nums text-zinc-100">{effectiveQty}</div>
+                      <button
+                        type="button"
+                        onClick={() => adjustQty(1)}
+                        disabled={!canMint || effectiveQty >= maxQty}
+                        className="text-lg text-zinc-200 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:text-zinc-600"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setQty(maxQty > 0 ? maxQty : 1)}
+                      disabled={!canMint || effectiveQty >= maxQty}
+                      className="no-hover-fill ml-2 cursor-pointer bg-transparent text-[10px] text-zinc-500 underline underline-offset-2 transition-colors hover:text-zinc-300 disabled:cursor-not-allowed disabled:text-zinc-700 md:absolute md:right-1 md:top-full md:ml-0 md:mt-1"
+                    >
+                      max
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => adjustQty(-1)}
-                disabled={!canMint || qty <= 1}
-                className="text-2xl text-zinc-200 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:text-zinc-600"
-                aria-label="Decrease quantity"
+                onClick={handleMint}
+                disabled={!canMint}
+                className="h-12 w-full max-w-[520px] min-w-0 md:flex-1 md:max-w-none rounded-none border border-white bg-zinc-900 px-4 text-lg tracking-[0.04em] text-zinc-100 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-55"
               >
-                -
-              </button>
-              <div className="flex items-center justify-center border-x border-zinc-700 text-xl tabular-nums text-zinc-100">{effectiveQty}</div>
-              <button
-                type="button"
-                onClick={() => adjustQty(1)}
-                disabled={!canMint || effectiveQty >= maxQty}
-                className="text-2xl text-zinc-200 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:text-zinc-600"
-                aria-label="Increase quantity"
-              >
-                +
+                {isMinting ? (
+                  "Minting..."
+                ) : canMint ? (
+                  <span className="inline-flex items-center gap-3">
+                    <span>Mint {effectiveQty}</span>
+                    <span className="h-5 w-px bg-zinc-500" aria-hidden />
+                    <span>{formatEth(totalPrice)} ETH</span>
+                  </span>
+                ) : (
+                  "Phase Full"
+                )}
               </button>
             </div>
-          </div>
+          </section>
+        )}
 
-          <button
-            type="button"
-            onClick={handleMint}
-            disabled={!canMint}
-            className="h-12 rounded-none border border-white bg-zinc-900 px-6 text-lg tracking-[0.04em] text-zinc-100 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-55"
-          >
-            {isMinting ? "Minting..." : canMint ? `Mint ${effectiveQty > 1 ? `(${effectiveQty})` : ""}` : "Phase Full"}
-          </button>
-        </section>
-
-        <div className="mt-2 flex items-center justify-between text-xs tracking-[0.06em] text-zinc-400 uppercase">
-          <span>Price: {formatEth(unitPrice)} ETH each</span>
-          <span>Total: {formatEth(totalPrice)} ETH</span>
-        </div>
-
-        <div className="mt-4 text-sm text-zinc-400">
+        <div className="mt-4 md:mt-8 text-sm text-zinc-400 text-center md:text-left">
           <button
             type="button"
             onClick={() => setIsCollectorDialogOpen(true)}
-            className="font-medium underline underline-offset-4 transition-colors hover:text-zinc-100"
+            className="no-hover-fill font-medium underline underline-offset-4 transition-colors hover:text-zinc-100"
           >
             Committed Collectors: <span className="font-semibold">{collectors}</span>
           </button>
@@ -487,7 +578,7 @@ export function SplitMintMockup({
         >
           <DialogTitle className="text-lg tracking-[0.06em] uppercase">Split Tree View</DialogTitle>
 
-          <div className="mt-3 space-y-1 border-y border-zinc-800/70 py-4">
+          <div className="mt-3 space-y-1 border-y border-zinc-800/70 py-8">
             {phaseRows.map((row) => (
               <div
                 key={`phase-row-${row.index}`}
