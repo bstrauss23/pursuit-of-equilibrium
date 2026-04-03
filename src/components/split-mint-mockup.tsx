@@ -386,26 +386,26 @@ export function SplitMintMockup({
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-[1240px] items-stretch gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-      <div className="mx-auto aspect-square w-full max-w-[520px] overflow-hidden rounded-none border border-zinc-800/80 bg-zinc-950 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+    <div className="grid w-full gap-5 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-stretch">
+      <div className="mx-auto w-full overflow-hidden rounded-none border border-zinc-800/80 bg-zinc-950 shadow-[0_10px_30px_rgba(0,0,0,0.35)] lg:h-full lg:w-auto lg:shrink-0">
         <Image
           src={artworkSrc}
           alt={artworkTitle}
-          width={896}
-          height={1344}
-          className="h-full w-full object-contain"
+          width={1024}
+          height={1024}
+          className="block h-auto w-full object-contain lg:h-full lg:w-auto lg:max-w-none"
           priority
         />
       </div>
 
       <div className="rounded-none border border-zinc-800/80 bg-zinc-950 p-5 text-zinc-100 shadow-[0_10px_30px_rgba(0,0,0,0.35)] md:p-6">
-        <h2 className="text-4xl leading-none text-zinc-100">{artworkTitle}</h2>
-        <p className="mt-2 text-base text-zinc-400">{artworkSubtitle}</p>
+        <h2 className="text-4xl leading-none text-zinc-100 text-center md:text-left">{artworkTitle}</h2>
+        <p className="mt-2 text-base text-zinc-400 text-center md:text-left">{artworkSubtitle}</p>
 
-        <section className="mt-5 border-y border-zinc-800/70 py-8">
-          <div className="mb-3 flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
+        <section className="mt-5 border-y border-zinc-800/70 bg-[linear-gradient(135deg,rgba(23,29,40,0.52),rgba(38,44,56,0.32))] px-8 py-8">
+          <div className="mb-5 flex flex-col items-center gap-4 md:mb-3 md:flex-row md:items-start md:justify-between">
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center gap-2 md:justify-start">
                 <p className="text-base leading-none tracking-[0.08em] text-zinc-100 uppercase">
                   {isPhaseClosed ? "PROGRESS: Mint Closed" : `PROGRESS: PHASE ${phaseIndex + 1}`}
                 </p>
@@ -444,9 +444,9 @@ export function SplitMintMockup({
               ) : null}
             </div>
             {!isPhaseClosed ? (
-              <div className="text-right">
+              <div className="w-full text-center md:w-auto md:text-right">
                 <p className="text-sm leading-none tracking-[0.04em] text-zinc-300">Phase Time Remaining:</p>
-                <p className="mt-1 inline-flex items-center justify-end gap-2 text-base leading-none tabular-nums text-zinc-100">
+                <p className="mt-1 inline-flex items-center justify-center gap-2 text-base leading-none tabular-nums text-zinc-100 md:justify-end">
                   <span className="current-phase-pulse inline-block h-1.5 w-1.5 bg-zinc-100" aria-hidden />
                   <span>{formatTimeRemaining(timeRemaining)}</span>
                 </p>
@@ -454,7 +454,7 @@ export function SplitMintMockup({
             ) : null}
           </div>
 
-          <div className="mt-8 space-y-3">
+          <div className="mt-10 space-y-3 md:mt-8">
             <p className="current-phase-pulse text-center text-xs tracking-[0.08em] text-zinc-100 uppercase">Current Phase</p>
             <TreeRow count={currentSupply} minted={mintedCount} showTopStub={phaseIndex > 0} />
             {nextSupply ? (
@@ -471,19 +471,17 @@ export function SplitMintMockup({
             ) : null}
           </div>
 
-          <div className="mt-2 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-base leading-none tracking-[0.05em] text-zinc-100">
-                {mintedCount} of {currentSupply} minted
-              </p>
-              <p className="mt-1 text-xs text-zinc-400">
-                This phase must fully mint before the timer ends to close the mint at an edition of {currentSupply}.
-              </p>
-            </div>
+          <div className="mt-5 grid gap-1 text-center md:mt-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-4 md:text-left">
+            <p className="text-base leading-none tracking-[0.05em] text-zinc-100">
+              {mintedCount} of {currentSupply} minted
+            </p>
+            <p className="text-xs text-zinc-400 md:pr-4">
+              This phase must fully mint before the timer ends to close the mint at an edition of {currentSupply}.
+            </p>
             <button
               type="button"
               onClick={() => setIsTreeDialogOpen(true)}
-              className="no-hover-fill text-sm text-zinc-300 underline underline-offset-4 transition-colors hover:text-zinc-100"
+              className="no-hover-fill justify-self-center whitespace-nowrap text-sm text-zinc-300 underline underline-offset-4 transition-colors hover:text-zinc-100 md:row-start-1 md:justify-self-end"
             >
               view tree
             </button>
@@ -574,7 +572,7 @@ export function SplitMintMockup({
         <DialogContent
           size="auto"
           showCloseButton
-          className="max-w-[95vw] w-auto max-h-[95vh] overflow-y-auto rounded-none border border-zinc-700 bg-[#17181b] px-8 py-6 text-zinc-100"
+          className="max-w-[95vw] w-auto max-h-[95vh] overflow-y-auto rounded-none border border-zinc-700 bg-[#17181b] p-6 text-zinc-100"
         >
           <DialogTitle className="text-lg tracking-[0.06em] uppercase">Split Tree View</DialogTitle>
 
