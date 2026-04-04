@@ -19,7 +19,7 @@ const PHASE_SUPPLIES = [1, 2, 4, 8, 16, 32, 64] as const;
 const GENESIS_ARTWORKS: GenesisArtwork[] = [
   {
     id: 1,
-    title: "First Contact 1",
+    title: "Primus No. 1",
     subtitle: "PROLOGUE",
     src: "/first-contact/first-contact-1.jpg",
     initialPhaseNumber: 1,
@@ -27,7 +27,7 @@ const GENESIS_ARTWORKS: GenesisArtwork[] = [
   },
   {
     id: 2,
-    title: "First Contact 2",
+    title: "Primus No. 2",
     subtitle: "PROLOGUE",
     src: "/first-contact/first-contact-2.jpg",
     initialPhaseNumber: 2,
@@ -35,7 +35,7 @@ const GENESIS_ARTWORKS: GenesisArtwork[] = [
   },
   {
     id: 3,
-    title: "First Contact 3",
+    title: "Primus No. 3",
     subtitle: "PROLOGUE",
     src: "/first-contact/first-contact-3.jpg",
     initialPhaseNumber: 3,
@@ -43,7 +43,7 @@ const GENESIS_ARTWORKS: GenesisArtwork[] = [
   },
   {
     id: 4,
-    title: "First Contact 4",
+    title: "Primus No. 4",
     subtitle: "PROLOGUE",
     src: "/first-contact/first-contact-4.jpg",
     initialPhaseNumber: 4,
@@ -51,7 +51,7 @@ const GENESIS_ARTWORKS: GenesisArtwork[] = [
   },
   {
     id: 5,
-    title: "First Contact 5",
+    title: "Primus No. 5",
     subtitle: "PROLOGUE",
     src: "/first-contact/first-contact-5.jpg",
     initialPhaseNumber: 5,
@@ -59,7 +59,7 @@ const GENESIS_ARTWORKS: GenesisArtwork[] = [
   },
   {
     id: 6,
-    title: "First Contact 6",
+    title: "Primus No. 6",
     subtitle: "PROLOGUE",
     src: "/first-contact/first-contact-6.jpg",
     initialPhaseNumber: 6,
@@ -96,7 +96,7 @@ export function PrologueMintGallery() {
                 className="group overflow-hidden rounded-md border border-zinc-700/70 bg-black/45 text-left shadow-[0_14px_30px_rgba(0,0,0,0.35)]"
               >
                 <div className="border-b border-zinc-700/70 px-3 py-2">
-                  <p className="text-base font-semibold text-zinc-100">{artwork.title}</p>
+                  <p className="font-mono text-base font-semibold text-zinc-100">{artwork.title}</p>
                 </div>
                 <div className="aspect-square overflow-hidden bg-black/35">
                   <Image

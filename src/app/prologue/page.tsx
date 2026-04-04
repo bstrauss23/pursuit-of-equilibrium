@@ -36,11 +36,11 @@ export default function ProloguePage() {
           <div className="mb-24 flex flex-col items-center gap-4 text-center md:mb-32 md:gap-6">
             <div className="flex flex-col items-center gap-1">
               <p className="text-sm tracking-[0.2em] text-zinc-300 uppercase md:text-lg">Prologue</p>
-              <h1 className="text-4xl tracking-[0.2em] text-zinc-100 md:text-8xl">FIRST CONTACT</h1>
+              <h1 className="text-4xl tracking-[0.2em] text-zinc-100 md:text-8xl">PRIMUS</h1>
             </div>
-            <h2 className="text-lg tracking-[0.08em] text-zinc-200 md:text-2xl">
+            {/* <h2 className="text-lg tracking-[0.08em] text-zinc-200 md:text-2xl">
               Night One
-            </h2>
+            </h2> */}
             <h3 className="text-base tracking-[0.08em] text-zinc-300 md:text-lg">by BEN STRAUSS</h3>
           </div>
           <PrologueMintGallery />

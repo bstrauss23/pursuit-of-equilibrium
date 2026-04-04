@@ -399,8 +399,8 @@ export function SplitMintMockup({
       </div>
 
       <div className="rounded-none border border-zinc-800/80 bg-zinc-950 p-5 text-zinc-100 shadow-[0_10px_30px_rgba(0,0,0,0.35)] md:p-6">
-        <h2 className="text-4xl leading-none text-zinc-100 text-center md:text-left">{artworkTitle}</h2>
-        <p className="mt-2 text-base text-zinc-400 text-center md:text-left">{artworkSubtitle}</p>
+        <h2 className="font-mono text-4xl leading-none text-zinc-100 text-center md:text-left">{artworkTitle}</h2>
+        <p className="mt-2 font-mono text-base text-zinc-400 text-center md:text-left">{artworkSubtitle}</p>
 
         <section className="mt-5 border-y border-zinc-800/70 bg-[linear-gradient(135deg,rgba(23,29,40,0.52),rgba(38,44,56,0.32))] px-8 py-8">
           <div className="mb-5 flex flex-col items-center gap-4 md:mb-3 md:flex-row md:items-start md:justify-between">
@@ -455,9 +455,13 @@ export function SplitMintMockup({
           </div>
 
           <div className="mt-10 space-y-3 md:mt-8">
-            <p className="current-phase-pulse text-center text-xs tracking-[0.08em] text-zinc-100 uppercase">Current Phase</p>
+            <p
+              className={`text-center text-xs tracking-[0.08em] text-zinc-100 uppercase ${isPhaseClosed ? "" : "current-phase-pulse"}`}
+            >
+              {isPhaseClosed ? "Final Phase" : "Current Phase"}
+            </p>
             <TreeRow count={currentSupply} minted={mintedCount} showTopStub={phaseIndex > 0} />
-            {nextSupply ? (
+            {!isPhaseClosed && nextSupply ? (
               <div className="-mt-6 opacity-45">
                 <button
                   type="button"
@@ -471,17 +475,19 @@ export function SplitMintMockup({
             ) : null}
           </div>
 
-          <div className="mt-5 grid gap-1 text-center md:mt-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-4 md:text-left">
-            <p className="text-base leading-none tracking-[0.05em] text-zinc-100">
-              {mintedCount} of {currentSupply} minted
-            </p>
-            <p className="text-xs text-zinc-400 md:pr-4">
-              This phase must fully mint before the timer ends to close the mint at an edition of {currentSupply}.
-            </p>
+          <div className="mt-5 flex flex-col items-center gap-1 text-center md:mt-2 md:flex-row md:items-start md:justify-between md:gap-4 md:text-left">
+            <div>
+              <p className="text-base leading-none tracking-[0.05em] text-zinc-100">
+                {mintedCount} of {currentSupply} minted
+              </p>
+              <p className="mt-1 text-xs text-zinc-400">
+                This phase must fully mint before the timer ends to close the mint at an edition of {currentSupply}.
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => setIsTreeDialogOpen(true)}
-              className="no-hover-fill justify-self-center whitespace-nowrap text-sm text-zinc-300 underline underline-offset-4 transition-colors hover:text-zinc-100 md:row-start-1 md:justify-self-end"
+              className="no-hover-fill whitespace-nowrap text-sm text-zinc-300 underline underline-offset-4 transition-colors hover:text-zinc-100 md:mt-0"
             >
               view tree
             </button>
